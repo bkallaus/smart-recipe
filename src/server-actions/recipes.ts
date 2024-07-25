@@ -23,6 +23,16 @@ export const getRecipeById = async (id: number) => {
 
 }
 
+
+export const searchRecipes = async (search: string): Promise<Recipe[]> => {
+    const client = await getClient();
+
+    const result = await client.query('SELECT id, name, description FROM recipe WHERE name ILIKE $1 limit 30', [`%${search}%`]);
+
+    return result.rows;
+
+};
+
 export const getFullRecipeById = async (id: number): Promise<FullRecipe> => {
 
     const client = await getClient();
@@ -50,6 +60,7 @@ export const insertRecipe = async (recipe: IngestRecipe) => {
         const recipeResult = await client.query('INSERT INTO recipe (name, description, url, primary_image) VALUES ($1, $2, $3, $4) RETURNING id', [recipe.name, recipe.description, recipe.url, recipe.heroImage]);
 
         recipeId = recipeResult.rows[0].id;
+       
         const ingredientsInsert = recipe.ingredients.map((ingredient, index) => {
             return client.query('INSERT INTO ingredient (recipe_id, label, sort) VALUES ($1, $2, $3)', [recipeId, ingredient, index]);
         });

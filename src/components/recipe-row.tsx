@@ -3,10 +3,10 @@ import { titleCase } from "title-case";
 
 const RecipeRow = ({ recipes }: { recipes: Recipe[] }) => {
   return (
-    <div className="grid grid-cols-3 gap-4 lg:gap-10">
+    <div className="grid md:grid-cols-3 gap-4 lg:gap-10">
       {recipes.map((recipe) => (
         <a key={`recipe-${recipe.id}`} href={`/recipe/${recipe.id}`}>
-          <div className="bg-white p-4 rounded-md shadow-md">
+          <div className="bg-white p-4 rounded-md shadow-md h-full">
             {/* <img
             src={recipe.heroImage}
             alt={recipe.name}

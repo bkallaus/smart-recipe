@@ -1,9 +1,11 @@
 "use client";
 import { ingestRecipe } from "@/app/query";
 import { useToast } from "./ui/use-toast";
+import { useRouter } from "next/navigation";
 
 const RecipeIngest = () => {
   const { toast } = useToast();
+  const router = useRouter();
   const onMagicIngest = async () => {
     try {
       const clipboardUrl = await navigator.clipboard.readText();
@@ -15,13 +17,14 @@ const RecipeIngest = () => {
         });
       }
 
-      await ingestRecipe(clipboardUrl);
+      const recipeId = await ingestRecipe(clipboardUrl);
 
       toast({
         title: "Ingested Recipe",
-        // description: `We've ingested the recipe for you ${mappedRecipe.name}`,
-        description: `We've ingested the recipe for you`,
+        description: `We've ingested the recipe for you, navigating now`,
       });
+
+      router.push(`/recipe/${recipeId}`);
     } catch (error) {
       toast({
         title: "Error Ingesting Recipe",

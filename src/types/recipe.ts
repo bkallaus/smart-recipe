@@ -2,7 +2,8 @@ export type Recipe = {
     id: number;
     name: string;
     description: string;
-    heroImage: string;
+    primary_image: string;
+    url: string;
   };
   
   export type FullRecipe = Recipe & {
