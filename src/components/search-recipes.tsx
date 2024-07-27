@@ -14,15 +14,12 @@ const SearchRecipes = () => {
   const searchForRecipes = async (search: string) => {
     const recipes = await searchRecipes(search);
 
-    console.log(recipes);
-
     return recipes;
   };
 
   useEffect(() => {
     if (value) {
       searchForRecipes(value).then((recipes) => {
-        console.log(recipes);
         setRecentRecipes(recipes);
       });
     }

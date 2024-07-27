@@ -26,6 +26,7 @@ const RecipeIngest = () => {
 
       router.push(`/recipe/${recipeId}`);
     } catch (error) {
+      console.error(`failed to ingest:`, error);
       toast({
         title: "Error Ingesting Recipe",
         description:

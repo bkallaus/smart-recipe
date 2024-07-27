@@ -1,7 +1,7 @@
 'use server';
 import ogs from "open-graph-scraper";
-import { convertJsonLdToIngest } from "./helpers/ingest-helper";
-import { getRecipeById, insertRecipe } from "@/server-actions/recipes";
+import { convertJsonLdToIngest } from "../helpers/ingest-helper";
+import { insertRecipe } from "@/server-actions/recipes";
 
 export const getJson = async (url: string) => {
     const options = {
@@ -16,10 +16,15 @@ export const getJson = async (url: string) => {
 export const ingestRecipe = async (url: string) => {
 
     const options = {
-        url
+        url,
+        convertJsonLdToIngest
     };
     
     const results = await ogs(options);
+
+    if(results.error) {
+        throw new Error('Could not ingest recipe');
+    }
 
     const json =  results.result.jsonLD;
 
