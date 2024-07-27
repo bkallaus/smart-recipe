@@ -5,4 +5,4 @@ type IngestRecipe = {
     ingredients: string[];
     steps: string[];
     url: string;
-}
+};

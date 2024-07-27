@@ -1,40 +1,39 @@
 'use server';
-import ogs from "open-graph-scraper";
-import { convertJsonLdToIngest } from "../helpers/ingest-helper";
-import { insertRecipe } from "@/server-actions/recipes";
+import { insertRecipe } from '@/server-actions/recipes';
+import ogs from 'open-graph-scraper';
+import { convertJsonLdToIngest } from '../helpers/ingest-helper';
 
 export const getJson = async (url: string) => {
     const options = {
-        url
+        url,
     };
-    
+
     const results = await ogs(options);
 
     return results.result.jsonLD;
-}
+};
 
 export const ingestRecipe = async (url: string) => {
-
     const options = {
         url,
-        convertJsonLdToIngest
+        convertJsonLdToIngest,
     };
-    
+
     const results = await ogs(options);
 
-    if(results.error) {
+    if (results.error) {
         throw new Error('Could not ingest recipe');
     }
 
-    const json =  results.result.jsonLD;
+    const json = results.result.jsonLD;
 
     const mappedRecipe = await convertJsonLdToIngest(json, url);
-    
-    if(!mappedRecipe) {
+
+    if (!mappedRecipe) {
         throw new Error('Could not convert jsonLD to ingest recipe');
     }
-    
+
     const result = await insertRecipe(mappedRecipe);
 
     return result.id;
-}
+};

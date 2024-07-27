@@ -4,9 +4,9 @@ export type Recipe = {
     description: string;
     primary_image: string;
     url: string;
-  };
-  
-  export type FullRecipe = Recipe & {
+};
+
+export type FullRecipe = Recipe & {
     ingredients: string[];
     steps: string[];
-  };
+};
