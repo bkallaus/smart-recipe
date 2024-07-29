@@ -1,7 +1,7 @@
-"use client";
-import { ingestRecipe } from "@/app/query";
-import { useRouter } from "next/navigation";
-import { useToast } from "./ui/use-toast";
+'use client';
+import { ingestRecipe } from '@/app/query';
+import { useRouter } from 'next/navigation';
+import { useToast } from './ui/use-toast';
 
 const RecipeIngest = () => {
   const { toast } = useToast();
@@ -10,27 +10,27 @@ const RecipeIngest = () => {
     try {
       const clipboardUrl = await navigator.clipboard.readText();
 
-      if (!clipboardUrl.includes("https://")) {
+      if (!clipboardUrl.includes('https://')) {
         toast({
-          title: "Invalid URL",
-          description: "Please copy a valid URL",
+          title: 'Invalid URL',
+          description: 'Please copy a valid URL',
         });
       }
 
       const recipeId = await ingestRecipe(clipboardUrl);
 
       toast({
-        title: "Ingested Recipe",
+        title: 'Ingested Recipe',
         description: `We've ingested the recipe for you, navigating now`,
       });
 
       router.push(`/recipe/${recipeId}`);
     } catch (error) {
-      console.error("failed to ingest:", error);
+      console.error('failed to ingest:', error);
       toast({
-        title: "Error Ingesting Recipe",
+        title: 'Error Ingesting Recipe',
         description:
-          "Your URL may be invalid or the recipe could not be ingested",
+          'Your URL may be invalid or the recipe could not be ingested',
       });
     }
   };
@@ -38,8 +38,8 @@ const RecipeIngest = () => {
   return (
     <div>
       <button
-        type="button"
-        className="border border-slate-300 rounded p-3"
+        type='button'
+        className='border border-slate-300 rounded p-3'
         onClick={onMagicIngest}
       >
         Ingest Recipe
