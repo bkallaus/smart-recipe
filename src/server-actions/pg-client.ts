@@ -1,17 +1,15 @@
-import pg from 'pg';
+import { Client, type ClientBase } from 'pg';
 
-const { Client } = pg;
+let client: ClientBase;
 
-let client: typeof Client;
-
-export const getClient = async (): typeof Client => {
-    if (client) {
-        return client;
-    }
-
-    client = new Client();
-
-    await client.connect();
-
+export const getClient = async (): Promise<ClientBase> => {
+  if (client) {
     return client;
+  }
+
+  client = new Client();
+
+  await client.connect();
+
+  return client;
 };
