@@ -2,20 +2,9 @@ import RecipeIngest from "@/components/recipe-ingest";
 import RecipeRow from "@/components/recipe-row";
 import SearchRecipes from "@/components/search-recipes";
 import { getRecentRecipes } from "@/server-actions/recipes";
-import { hasAccess } from "@/server-actions/verify-credentials";
 
 const Home = async () => {
   const recentRecipes = await getRecentRecipes(9);
-
-  if (!(await hasAccess())) {
-    return (
-      <main>
-        <div className="m-auto text-xl font-bold text-center">
-          Please Login to Access Site
-        </div>
-      </main>
-    );
-  }
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
