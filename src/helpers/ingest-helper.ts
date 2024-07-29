@@ -9,6 +9,7 @@ type RecipeJson = {
   thumbnailUrl: string;
 };
 
+// todo: consider creating image slug instead of id
 const slugify = (originalString: string) => {
   if (!originalString) return nanoid();
 
@@ -32,6 +33,7 @@ const convertRecipe = (recipeJson: RecipeJson, originalUrl: string) => {
       [instruction.name, instruction.text].filter(Boolean).join(' : '),
     );
 
+  // todo: add more ways to find images
   return {
     heroImage: recipeJson.thumbnailUrl,
     name,

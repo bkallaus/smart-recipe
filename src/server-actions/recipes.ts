@@ -32,7 +32,9 @@ export const searchRecipes = async (search: string): Promise<Recipe[]> => {
   return result.rows;
 };
 
-export const getFullRecipeById = async (id: number): Promise<FullRecipe> => {
+export const getFullRecipeById = async (
+  id: number,
+): Promise<FullRecipe | null> => {
   const client = await getClient();
 
   const result = await client.query('SELECT * FROM recipe WHERE id = $1', [id]);
@@ -44,6 +46,10 @@ export const getFullRecipeById = async (id: number): Promise<FullRecipe> => {
     'SELECT * FROM steps WHERE recipe_id = $1 ORDER BY sort',
     [id],
   );
+
+  if (!result?.rows.length) {
+    return null;
+  }
 
   return {
     ...result.rows[0],
