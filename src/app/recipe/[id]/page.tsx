@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { getFullRecipeById } from "@/server-actions/recipes";
 import Image from "next/image";
 import { notFound } from "next/navigation";
@@ -25,7 +26,9 @@ const IndividualRecipe = async ({
         <div className="h-5" />
         <div className="flex justify-between">
           <h1 className="text-xl font-semibold">{titleCase(recipe.name)}</h1>
-          <a href={recipe.url}>External Link</a>
+          <Button asChild variant={"outline"}>
+            <a href={recipe.url}>External Link</a>
+          </Button>
         </div>
         <div>
           <p>{recipe.description}</p>
