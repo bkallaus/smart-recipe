@@ -6,6 +6,7 @@ type RecipeJson = {
   description: string;
   recipeIngredient: string[];
   recipeInstructions: any[];
+  image: string | string[];
   thumbnailUrl: string;
 };
 
@@ -33,9 +34,13 @@ const convertRecipe = (recipeJson: RecipeJson, originalUrl: string) => {
       [instruction.name, instruction.text].filter(Boolean).join(' : '),
     );
 
+  const image = Array.isArray(recipeJson.image)
+    ? recipeJson.image[0]
+    : recipeJson.image;
+
   // todo: add more ways to find images
   return {
-    heroImage: recipeJson.thumbnailUrl,
+    heroImage: image ?? recipeJson.thumbnailUrl,
     name,
     url: originalUrl,
     description,

@@ -16,7 +16,6 @@ export const getJson = async (url: string) => {
 export const ingestRecipe = async (url: string) => {
   const options = {
     url,
-    convertJsonLdToIngest,
   };
 
   const results = await ogs(options);
