@@ -5,15 +5,17 @@ import { useToast } from "./ui/use-toast";
 import { Button } from "./ui/button";
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
+import { insertIntoFailedIngest } from "@/server-actions/recipes";
 
 const RecipeIngest = () => {
   const { toast } = useToast();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const onMagicIngest = async () => {
+    const clipboardUrl = await navigator.clipboard.readText();
+
     try {
       setLoading(true);
-      const clipboardUrl = await navigator.clipboard.readText();
 
       if (!clipboardUrl.includes("https://")) {
         toast({
@@ -32,6 +34,9 @@ const RecipeIngest = () => {
       router.push(`/recipe/${recipeId}`);
     } catch (error) {
       console.error("failed to ingest:", error);
+      if (clipboardUrl) {
+        await insertIntoFailedIngest(clipboardUrl);
+      }
       toast({
         title: "Error Ingesting Recipe",
         description:

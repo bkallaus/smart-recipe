@@ -96,3 +96,9 @@ export const insertRecipe = async (recipe: IngestRecipe) => {
 
   return getRecipeById(recipeId);
 };
+
+export const insertIntoFailedIngest = async (url: string) => {
+  const client = await getClient();
+
+  await client.query('INSERT INTO failed_ingest (url) VALUES ($1)', [url]);
+};
