@@ -1,4 +1,5 @@
 import RecipeIngestButton from "@/components/reingest-button";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getFullRecipeById } from "@/server-actions/recipes";
 import { notFound } from "next/navigation";
@@ -32,6 +33,10 @@ const IndividualRecipe = async ({
           <RecipeIngestButton recipe={recipe} />
         </div>
         <div>
+          <div className="flex gap-1">
+            {recipe.cuisine && <Badge>{recipe.cuisine}</Badge>}
+            {recipe.category && <Badge>{recipe.category}</Badge>}
+          </div>
           <p>{recipe.description}</p>
           <div className="h-5" />
           <h2 className="text-lg font-medium">Ingredients</h2>
