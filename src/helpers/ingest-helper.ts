@@ -9,7 +9,7 @@ type RecipeJson = {
   description: string;
   recipeIngredient: string[];
   recipeInstructions: any[];
-  image: string | string[];
+  image: string | string[] | { url: string };
   thumbnailUrl: string;
 };
 
@@ -44,11 +44,22 @@ const convertRecipe = (
     ? recipeJson.image[0]
     : recipeJson.image;
 
+  const cuisine = Array.isArray(recipeJson.recipeCuisine)
+    ? recipeJson.recipeCuisine.join(', ')
+    : recipeJson.recipeCuisine;
+
+  const category = Array.isArray(recipeJson.recipeCategory)
+    ? recipeJson.recipeCategory.join(', ')
+    : recipeJson.recipeCategory;
+
+  const keywords = Array.isArray(recipeJson.keywords)
+    ? recipeJson.keywords.join(', ')
+    : recipeJson.keywords;
   return {
-    cuisine: recipeJson.recipeCuisine,
-    category: recipeJson.recipeCategory,
-    keywords: recipeJson.keywords,
-    heroImage: image ?? recipeJson.thumbnailUrl,
+    cuisine,
+    category,
+    keywords,
+    heroImage: typeof image === 'object' ? image.url : image,
     name,
     url: originalUrl,
     description,

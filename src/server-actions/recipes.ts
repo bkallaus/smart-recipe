@@ -105,6 +105,12 @@ export const insertRecipe = async (recipe: IngestRecipe) => {
   return getRecipeById(recipeId);
 };
 
+export const deleteRecipe = async (id: number) => {
+  const client = await getClient();
+
+  await client.query('DELETE FROM recipe WHERE id = $1', [id]);
+};
+
 export const insertIntoFailedIngest = async (url: string) => {
   const client = await getClient();
 

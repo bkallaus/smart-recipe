@@ -1,6 +1,6 @@
+import RecipeIngestButton from "@/components/reingest-button";
 import { Button } from "@/components/ui/button";
 import { getFullRecipeById } from "@/server-actions/recipes";
-import Image from "next/image";
 import { notFound } from "next/navigation";
 import { titleCase } from "title-case";
 
@@ -29,6 +29,7 @@ const IndividualRecipe = async ({
           <Button asChild variant={"outline"}>
             <a href={recipe.url}>External Link</a>
           </Button>
+          <RecipeIngestButton recipe={recipe} />
         </div>
         <div>
           <p>{recipe.description}</p>
