@@ -2,6 +2,9 @@ import { nanoid } from 'nanoid';
 
 type RecipeJson = {
   name: string;
+  recipeCuisine: string;
+  recipeCategory: string;
+  keywords: string;
   headline: string;
   description: string;
   recipeIngredient: string[];
@@ -24,7 +27,10 @@ const slugify = (originalString: string) => {
   return str;
 };
 
-const convertRecipe = (recipeJson: RecipeJson, originalUrl: string) => {
+const convertRecipe = (
+  recipeJson: RecipeJson,
+  originalUrl: string,
+): IngestRecipe => {
   const name = recipeJson.name ?? recipeJson.headline;
   const description = recipeJson.description;
   const ingredients = recipeJson.recipeIngredient;
@@ -38,8 +44,10 @@ const convertRecipe = (recipeJson: RecipeJson, originalUrl: string) => {
     ? recipeJson.image[0]
     : recipeJson.image;
 
-  // todo: add more ways to find images
   return {
+    cuisine: recipeJson.recipeCuisine,
+    category: recipeJson.recipeCategory,
+    keywords: recipeJson.keywords,
     heroImage: image ?? recipeJson.thumbnailUrl,
     name,
     url: originalUrl,

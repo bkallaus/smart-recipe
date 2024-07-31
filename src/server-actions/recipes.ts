@@ -66,8 +66,16 @@ export const insertRecipe = async (recipe: IngestRecipe) => {
     await client.query('BEGIN');
 
     const recipeResult = await client.query(
-      'INSERT INTO recipe (name, description, url, primary_image) VALUES ($1, $2, $3, $4) RETURNING id',
-      [recipe.name, recipe.description, recipe.url, recipe.heroImage],
+      'INSERT INTO recipe (name, description, url, primary_image, cuisine, category, keywords) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id',
+      [
+        recipe.name,
+        recipe.description,
+        recipe.url,
+        recipe.heroImage,
+        recipe.cuisine,
+        recipe.category,
+        recipe.keywords,
+      ],
     );
 
     recipeId = recipeResult.rows[0].id;
