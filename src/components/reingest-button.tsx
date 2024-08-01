@@ -5,6 +5,7 @@ import type { FullRecipe } from "@/types/recipe";
 import { Button } from "./ui/button";
 import { useState } from "react";
 import { useToast } from "./ui/use-toast";
+import { Loader2 } from "lucide-react";
 
 const RecipeIngestButton = ({ recipe }: { recipe: FullRecipe }) => {
   const [loading, setLoading] = useState(false);
@@ -33,7 +34,11 @@ const RecipeIngestButton = ({ recipe }: { recipe: FullRecipe }) => {
       setLoading(false);
     }
   };
-  return <Button onClick={rescanRecipe}>Rescan</Button>;
+  return (
+    <Button disabled={loading} onClick={rescanRecipe}>
+      {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Rescan
+    </Button>
+  );
 };
 
 export default RecipeIngestButton;
