@@ -9,10 +9,10 @@ const IndividualRecipe = async ({
   params,
 }: {
   params: {
-    id: number;
+    uuid: string;
   };
 }) => {
-  const recipe = await getFullRecipeById(Number(params.id));
+  const recipe = await getFullRecipeById(params.uuid);
 
   if (!recipe) {
     notFound();
@@ -21,7 +21,7 @@ const IndividualRecipe = async ({
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
       <div>
-        {recipe.primary_image && recipe.primary_image.includes("supabase") && (
+        {recipe.primary_image?.includes("supabase") && (
           <img
             src={recipe.primary_image}
             width={400}

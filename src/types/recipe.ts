@@ -1,5 +1,6 @@
 export type Recipe = {
   id: number;
+  uuid: string;
   name: string;
   description: string;
   primary_image: string;

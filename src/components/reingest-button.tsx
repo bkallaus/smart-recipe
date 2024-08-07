@@ -7,15 +7,14 @@ import { useState } from "react";
 import { useToast } from "./ui/use-toast";
 import { Loader2 } from "lucide-react";
 
-const RecipeIngestButton = ({ recipe }: { recipe: FullRecipe }) => {
+const ReIngestButton = ({ recipe }: { recipe: FullRecipe }) => {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
   const rescanRecipe = async () => {
     try {
       setLoading(true);
-      const newUrl = await ingestRecipe(recipe.url);
-
+      const newUrl = await ingestRecipe(recipe.url, recipe.uuid);
       await deleteRecipe(recipe.id);
 
       toast({
@@ -26,7 +25,7 @@ const RecipeIngestButton = ({ recipe }: { recipe: FullRecipe }) => {
       window.location.href = `/recipe/${newUrl}`;
     } catch (error) {
       toast({
-        title: "Update Fialed",
+        title: "Update Failed",
         description: "Recipe has failed to update",
       });
       await insertIntoFailedIngest(recipe.url);
@@ -42,4 +41,4 @@ const RecipeIngestButton = ({ recipe }: { recipe: FullRecipe }) => {
   );
 };
 
-export default RecipeIngestButton;
+export default ReIngestButton;

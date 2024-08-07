@@ -6,7 +6,7 @@ export const getRecentRecipes = async (limit = 15): Promise<Recipe[]> => {
   const client = await getClient();
 
   const result = await client.query(
-    'SELECT id, name, description FROM recipe order by id desc LIMIT $1',
+    'SELECT uuid, name, description FROM recipe order by id desc LIMIT $1',
     [limit],
   );
 
@@ -33,18 +33,22 @@ export const searchRecipes = async (search: string): Promise<Recipe[]> => {
 };
 
 export const getFullRecipeById = async (
-  id: number,
+  uuid: string,
 ): Promise<FullRecipe | null> => {
   const client = await getClient();
 
-  const result = await client.query('SELECT * FROM recipe WHERE id = $1', [id]);
+  const result = await client.query(
+    'SELECT * FROM recipe WHERE recipe.uuid = $1',
+    [uuid],
+  );
+  const recipeId = result.rows[0].id;
   const ingredients = await client.query(
     'SELECT * FROM ingredient WHERE recipe_id = $1 ORDER BY sort',
-    [id],
+    [recipeId],
   );
   const steps = await client.query(
     'SELECT * FROM steps WHERE recipe_id = $1 ORDER BY sort',
-    [id],
+    [recipeId],
   );
 
   if (!result?.rows.length) {
@@ -58,27 +62,44 @@ export const getFullRecipeById = async (
   };
 };
 
-export const insertRecipe = async (recipe: IngestRecipe) => {
+export const insertRecipe = async (recipe: IngestRecipe, uuid?: string) => {
   const client = await getClient();
   let recipeId: number;
 
   try {
     await client.query('BEGIN');
 
-    const recipeResult = await client.query(
-      'INSERT INTO recipe (name, description, url, primary_image, cuisine, category, keywords) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id',
-      [
-        recipe.name,
-        recipe.description,
-        recipe.url,
-        recipe.heroImage,
-        recipe.cuisine,
-        recipe.category,
-        recipe.keywords,
-      ],
-    );
+    if (uuid) {
+      const recipeResult = await client.query(
+        'INSERT INTO recipe (name, description, url, primary_image, cuisine, category, keywords, uuid) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id',
+        [
+          recipe.name,
+          recipe.description,
+          recipe.url,
+          recipe.heroImage,
+          recipe.cuisine,
+          recipe.category,
+          recipe.keywords,
+          uuid,
+        ],
+      );
 
-    recipeId = recipeResult.rows[0].id;
+      recipeId = recipeResult.rows[0].id;
+    } else {
+      const recipeResult = await client.query(
+        'INSERT INTO recipe (name, description, url, primary_image, cuisine, category, keywords) VALUES ($1, $2, $3, $4, $5, $6, $7, ) RETURNING id',
+        [
+          recipe.name,
+          recipe.description,
+          recipe.url,
+          recipe.heroImage,
+          recipe.cuisine,
+          recipe.category,
+          recipe.keywords,
+        ],
+      );
+      recipeId = recipeResult.rows[0].id;
+    }
 
     const ingredientsInsert = recipe.ingredients.map((ingredient, index) => {
       return client.query(

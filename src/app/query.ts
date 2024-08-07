@@ -14,7 +14,7 @@ export const getJson = async (url: string) => {
   return results.result.jsonLD;
 };
 
-export const ingestRecipe = async (url: string) => {
+export const ingestRecipe = async (url: string, uuid?: string) => {
   const options = {
     url,
   };
@@ -40,7 +40,7 @@ export const ingestRecipe = async (url: string) => {
     }
   }
 
-  const result = await insertRecipe(mappedRecipe);
+  const result = await insertRecipe(mappedRecipe, uuid);
 
-  return result.id;
+  return result.uuid;
 };
