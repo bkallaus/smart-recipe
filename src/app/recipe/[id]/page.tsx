@@ -21,7 +21,7 @@ const IndividualRecipe = async ({
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
       <div>
-        {/* {recipe.primary_image && (
+        {recipe.primary_image && recipe.primary_image.includes("supabase") && (
           <img
             src={recipe.primary_image}
             width={400}
@@ -29,7 +29,7 @@ const IndividualRecipe = async ({
             alt={""}
             className="m-auto"
           />
-        )} */}
+        )}
         <div className="h-5" />
         <div className="flex justify-between">
           <h1 className="text-xl font-semibold">{titleCase(recipe.name)}</h1>
