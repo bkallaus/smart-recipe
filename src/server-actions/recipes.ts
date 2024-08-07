@@ -87,7 +87,7 @@ export const insertRecipe = async (recipe: IngestRecipe, uuid?: string) => {
       recipeId = recipeResult.rows[0].id;
     } else {
       const recipeResult = await client.query(
-        'INSERT INTO recipe (name, description, url, primary_image, cuisine, category, keywords) VALUES ($1, $2, $3, $4, $5, $6, $7, ) RETURNING id',
+        'INSERT INTO recipe (name, description, url, primary_image, cuisine, category, keywords) VALUES ($1, $2, $3, $4, $5, $6, $7 ) RETURNING id',
         [
           recipe.name,
           recipe.description,
