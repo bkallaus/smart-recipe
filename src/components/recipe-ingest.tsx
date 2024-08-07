@@ -17,11 +17,13 @@ const RecipeIngest = () => {
     try {
       setLoading(true);
 
-      if (!clipboardUrl.includes("https://")) {
+      if (!clipboardUrl?.includes("https://")) {
         toast({
           title: "Invalid URL",
-          description: "Please copy a valid URL",
+          description: `${clipboardUrl} is not valid. Please copy a valid URL`,
         });
+
+        return null;
       }
 
       const recipeId = await ingestRecipe(clipboardUrl);
@@ -40,7 +42,7 @@ const RecipeIngest = () => {
       toast({
         title: "Error Ingesting Recipe",
         description:
-          "Your URL may be invalid or the recipe could not be ingested",
+          "Your URL may be invalid or the recipe could not be ingested, Please copy a valid url.",
       });
     } finally {
       setLoading(false);

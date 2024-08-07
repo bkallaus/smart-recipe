@@ -22,15 +22,20 @@ const IndividualRecipe = async ({
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
       <div>
         {/* {recipe.primary_image && (
-          <img src={recipe.primary_image} width={400} height={400} alt={""} />
+          <img
+            src={recipe.primary_image}
+            width={400}
+            height={400}
+            alt={""}
+            className="m-auto"
+          />
         )} */}
         <div className="h-5" />
         <div className="flex justify-between">
           <h1 className="text-xl font-semibold">{titleCase(recipe.name)}</h1>
           <Button asChild variant={"outline"}>
-            <a href={recipe.url}>External Link</a>
+            <a href={recipe.url}>Original Recipe</a>
           </Button>
-          <RecipeIngestButton recipe={recipe} />
         </div>
         <div>
           <div className="flex gap-1">
@@ -57,6 +62,8 @@ const IndividualRecipe = async ({
           ))}
         </div>
       </div>
+      <div className="mb-3">Missing information?</div>
+      <RecipeIngestButton recipe={recipe} />
     </main>
   );
 };
