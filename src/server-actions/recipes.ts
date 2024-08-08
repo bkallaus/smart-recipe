@@ -25,7 +25,7 @@ export const searchRecipes = async (search: string): Promise<Recipe[]> => {
   const client = await getClient();
 
   const result = await client.query(
-    'SELECT id, name, description FROM recipe WHERE name ILIKE $1 limit 30',
+    'SELECT uuid, name, description FROM recipe WHERE name ILIKE $1 limit 30',
     [`%${search}%`],
   );
 
