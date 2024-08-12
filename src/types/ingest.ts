@@ -1,9 +1,9 @@
-type Instruction = {
+export type Instruction = {
   label: string;
   section?: string;
 };
 
-type IngestRecipe = {
+export type IngestRecipe = {
   category: string;
   cuisine: string;
   keywords: string;

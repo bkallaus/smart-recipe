@@ -1,3 +1,5 @@
+import type { IngestRecipe, Instruction } from '@/types/ingest';
+
 type IngestInstruction = {
   name: string;
   text: string;
@@ -10,8 +12,6 @@ type InstructionsWithItems = {
   name: string;
 };
 
-type IngestFullInstructions = (IngestInstruction | InstructionsWithItems)[]; // Handle mixed types
-
 type RecipeJson = {
   name: string;
   recipeCuisine: string;
@@ -20,25 +20,35 @@ type RecipeJson = {
   headline: string;
   description: string;
   recipeIngredient: string[];
-  recipeInstructions: IngestFullInstructions;
+  recipeInstructions: (IngestInstruction | InstructionsWithItems)[];
   image: string | string[] | { url: string };
   thumbnailUrl: string;
+};
+
+const getInstructionFromItem = (item: IngestInstruction): Instruction => {
+  return {
+    label: [item.name, item.text].filter(Boolean).join(' : '),
+    section: item.section,
+  };
 };
 
 const getIntructionsFromArray = (list: IngestInstruction[]) => {
   const sorted = list.sort((a, b) => a.position - b.position);
 
-  return sorted.map((instruction: IngestInstruction) => ({
-    label: [instruction.name, instruction.text].filter(Boolean).join(' : '),
-    section: instruction.section,
-  }));
+  return sorted.map(getInstructionFromItem);
 };
 
-const getInstructionsWithSection = (recipeJson: RecipeJson) => {
-  if ('itemListElement' in recipeJson.recipeInstructions[0]) {
-    const stringIngredients = (
-      recipeJson.recipeInstructions as InstructionsWithItems[]
-    ).flatMap((list: InstructionsWithItems) => {
+const getInstructionsWithSection = (recipeJson: RecipeJson): Instruction[] => {
+  const stringIngredients = recipeJson.recipeInstructions.flatMap(
+    (list: InstructionsWithItems | IngestInstruction) => {
+      if (!('itemListElement' in list)) {
+        return {
+          name: list.name,
+          text: list.text,
+          position: list.position,
+        } as IngestInstruction;
+      }
+
       const section = list.name;
 
       return list.itemListElement.map(
@@ -50,14 +60,10 @@ const getInstructionsWithSection = (recipeJson: RecipeJson) => {
             section,
           }) as IngestInstruction,
       );
-    });
-
-    return getIntructionsFromArray(stringIngredients);
-  }
-
-  return getIntructionsFromArray(
-    recipeJson.recipeInstructions as IngestInstruction[],
+    },
   );
+
+  return getIntructionsFromArray(stringIngredients);
 };
 
 const convertRecipe = (
