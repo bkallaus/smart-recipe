@@ -1,3 +1,17 @@
+type IngestInstruction = {
+  name: string;
+  text: string;
+  position: number;
+  section?: string;
+};
+
+type InstructionsWithItems = {
+  itemListElement: IngestInstruction[];
+  name: string;
+};
+
+type IngestFullInstructions = (IngestInstruction | InstructionsWithItems)[]; // Handle mixed types
+
 type RecipeJson = {
   name: string;
   recipeCuisine: string;
@@ -6,9 +20,44 @@ type RecipeJson = {
   headline: string;
   description: string;
   recipeIngredient: string[];
-  recipeInstructions: any[];
+  recipeInstructions: IngestFullInstructions;
   image: string | string[] | { url: string };
   thumbnailUrl: string;
+};
+
+const getIntructionsFromArray = (list: IngestInstruction[]) => {
+  const sorted = list.sort((a, b) => a.position - b.position);
+
+  return sorted.map((instruction: IngestInstruction) => ({
+    label: [instruction.name, instruction.text].filter(Boolean).join(' : '),
+    section: instruction.section,
+  }));
+};
+
+const getInstructionsWithSection = (recipeJson: RecipeJson) => {
+  if ('itemListElement' in recipeJson.recipeInstructions[0]) {
+    const stringIngredients = (
+      recipeJson.recipeInstructions as InstructionsWithItems[]
+    ).flatMap((list: InstructionsWithItems) => {
+      const section = list.name;
+
+      return list.itemListElement.map(
+        (item: IngestInstruction) =>
+          ({
+            name: item.name,
+            text: item.text,
+            position: item.position,
+            section,
+          }) as IngestInstruction,
+      );
+    });
+
+    return getIntructionsFromArray(stringIngredients);
+  }
+
+  return getIntructionsFromArray(
+    recipeJson.recipeInstructions as IngestInstruction[],
+  );
 };
 
 const convertRecipe = (
@@ -18,11 +67,7 @@ const convertRecipe = (
   const name = recipeJson.name ?? recipeJson.headline;
   const description = recipeJson.description;
   const ingredients = recipeJson.recipeIngredient;
-  const steps = recipeJson.recipeInstructions
-    ?.sort((a, b) => a.position - b.position)
-    .map((instruction: any) =>
-      [instruction.name, instruction.text].filter(Boolean).join(' : '),
-    );
+  const steps = getInstructionsWithSection(recipeJson);
 
   const image = Array.isArray(recipeJson.image)
     ? recipeJson.image[0]

@@ -10,7 +10,13 @@ export type Recipe = {
   url: string;
 };
 
+export type Steps = {
+  label: string;
+  section?: string;
+  sort: number;
+};
+
 export type FullRecipe = Recipe & {
   ingredients: string[];
-  steps: string[];
+  steps: Steps[];
 };

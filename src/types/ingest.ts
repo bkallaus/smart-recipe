@@ -1,3 +1,8 @@
+type Instruction = {
+  label: string;
+  section?: string;
+};
+
 type IngestRecipe = {
   category: string;
   cuisine: string;
@@ -6,6 +11,6 @@ type IngestRecipe = {
   description: string;
   heroImage: string;
   ingredients: string[];
-  steps: string[];
+  steps: Instruction[];
   url: string;
 };

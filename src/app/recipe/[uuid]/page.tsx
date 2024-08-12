@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { getFullRecipeById } from "@/server-actions/recipes";
 import { notFound } from "next/navigation";
 import { titleCase } from "title-case";
+import StepsOrSections from "./steps-or-sections";
 
 const IndividualRecipe = async ({
   params,
@@ -52,14 +53,7 @@ const IndividualRecipe = async ({
         <div className="h-5" />
         <div>
           <h2 className="text-lg font-medium">Instructions</h2>
-          {recipe.steps.map((step, index) => (
-            <div key={`step-${index}`}>
-              <div>
-                {index + 1}) {step}
-              </div>
-              <div className="h-5" />
-            </div>
-          ))}
+          <StepsOrSections steps={recipe.steps} />
         </div>
       </div>
       <div className="mb-3">Missing information?</div>
