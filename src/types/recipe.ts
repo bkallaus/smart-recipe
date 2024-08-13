@@ -12,6 +12,7 @@ export type Recipe = {
 
 export type Steps = {
   label: string;
+  text: string;
   section?: string;
   sort: number;
 };

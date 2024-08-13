@@ -1,5 +1,6 @@
 export type Instruction = {
   label: string;
+  text?: string;
   section?: string;
 };
 

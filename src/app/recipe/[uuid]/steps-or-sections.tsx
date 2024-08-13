@@ -9,16 +9,16 @@ const StepsOrSections = ({ steps }: { steps: Steps[] }) => {
         acc[step.section] = [];
       }
 
-      acc[step.section].push(step.label);
+      acc[step.section].push(step);
     } else {
       if (!acc[Primary]) {
         acc[Primary] = [];
       }
-      acc[Primary].push(step.label);
+      acc[Primary].push(step);
     }
 
     return acc;
-  }, {} as { [key: string]: string[] });
+  }, {} as { [key: string]: Steps[] });
 
   return (
     <div>
@@ -28,7 +28,10 @@ const StepsOrSections = ({ steps }: { steps: Steps[] }) => {
           {steps.map((step, index) => (
             <div key={`step-${index}`}>
               <div>
-                {index + 1}) {step}
+                {index + 1}){" "}
+                {step.label === step.text
+                  ? step.label
+                  : [step.label, step.text].filter(Boolean).join("-")}
               </div>
               <div className="h-5" />
             </div>

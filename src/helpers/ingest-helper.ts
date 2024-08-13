@@ -27,8 +27,9 @@ type RecipeJson = {
 
 const getInstructionFromItem = (item: IngestInstruction): Instruction => {
   return {
-    label: [item.name, item.text].filter(Boolean).join(' : '),
+    label: item.name,
     section: item.section,
+    text: item.text,
   };
 };
 

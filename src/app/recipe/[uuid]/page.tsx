@@ -5,6 +5,8 @@ import { getFullRecipeById } from "@/server-actions/recipes";
 import { notFound } from "next/navigation";
 import { titleCase } from "title-case";
 import StepsOrSections from "./steps-or-sections";
+import { Paper } from "@/components/paper";
+import { Fragment } from "react";
 
 const IndividualRecipe = async ({
   params,
@@ -28,7 +30,7 @@ const IndividualRecipe = async ({
             width={400}
             height={400}
             alt={""}
-            className="m-auto"
+            className="m-auto rounded-lg"
           />
         )}
         <div className="h-5" />
@@ -45,16 +47,21 @@ const IndividualRecipe = async ({
           </div>
           <p>{recipe.description}</p>
           <div className="h-5" />
-          <h2 className="text-lg font-medium">Ingredients</h2>
-          {recipe.ingredients.map((ingredient, index) => (
-            <div key={`ingredient-${index}`}>{ingredient}</div>
-          ))}
+          <Paper>
+            <h2 className="text-lg font-medium">Ingredients</h2>
+            {recipe.ingredients.map((ingredient, index) => (
+              <Fragment key={`ingredient-${index}`}>
+                <div>{ingredient}</div>
+                <div className="h-3" />
+              </Fragment>
+            ))}
+          </Paper>
         </div>
         <div className="h-5" />
-        <div>
+        <Paper>
           <h2 className="text-lg font-medium">Instructions</h2>
           <StepsOrSections steps={recipe.steps} />
-        </div>
+        </Paper>
       </div>
       <div className="mb-3">Missing information?</div>
       <RecipeIngestButton recipe={recipe} />

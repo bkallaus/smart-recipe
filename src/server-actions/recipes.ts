@@ -47,7 +47,7 @@ export const getFullRecipeById = async (
     [recipeId],
   );
   const steps = await client.query(
-    'SELECT label, section, sort FROM steps WHERE recipe_id = $1 ORDER BY sort asc',
+    'SELECT label, section, text, sort FROM steps WHERE recipe_id = $1 ORDER BY sort asc',
     [recipeId],
   );
 
@@ -108,10 +108,17 @@ export const insertRecipe = async (recipe: IngestRecipe, uuid?: string) => {
       );
     });
 
+    console.log(recipe.steps);
     const instructionsInsert = recipe.steps.map((instruction, index) => {
       return client.query(
-        'INSERT INTO steps (recipe_id, label, sort, section) VALUES ($1, $2, $3, $4)',
-        [recipeId, instruction.label, index, instruction.section],
+        'INSERT INTO steps (recipe_id, label, text, sort, section) VALUES ($1, $2, $3, $4, $5)',
+        [
+          recipeId,
+          instruction.label ? instruction.label : instruction.text,
+          instruction.text ?? '',
+          index,
+          instruction.section,
+        ],
       );
     });
 
