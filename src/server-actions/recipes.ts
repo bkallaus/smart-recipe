@@ -1,5 +1,6 @@
 'use server';
 import type { FullRecipe, Recipe } from '@/types/recipe';
+import type { IngestRecipe } from '@/types/ingest';
 import { getClient } from './pg-client';
 
 export const getRecentRecipes = async (limit = 15): Promise<Recipe[]> => {
