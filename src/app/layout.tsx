@@ -71,7 +71,9 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
-      <head />
+      <head>
+        <link rel="shortcut icon" type="image/png" href="icon.png" />
+      </head>
       <body className={inter.className}>
         <Header />
         {children}
