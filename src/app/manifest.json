@@ -14,9 +14,10 @@
 			"type": "image/png"
 		}
 	],
+
 	"theme_color": "#FFFFFF",
 	"background_color": "#FFFFFF",
-	"start_url": "/?source=pwa",
+	"start_url": "/",
 	"display": "standalone",
 	"orientation": "portrait"
 }

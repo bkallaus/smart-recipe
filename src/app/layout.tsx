@@ -13,6 +13,13 @@ const APP_DESCRIPTION = "Recipe app for organizing your recipes";
 
 export const metadata: Metadata = {
   applicationName: APP_NAME,
+  icons: [
+    {
+      url: "./android-icon-192x192.png",
+      sizes: "192x192",
+      type: "image/png",
+    },
+  ],
   title: {
     default: APP_DEFAULT_TITLE,
     template: APP_TITLE_TEMPLATE,
@@ -22,7 +29,6 @@ export const metadata: Metadata = {
     capable: true,
     statusBarStyle: "default",
     title: APP_DEFAULT_TITLE,
-    // startUpImage: [],
   },
   formatDetection: {
     telephone: false,
@@ -61,7 +67,10 @@ export default async function RootLayout({
         <head />
         <body className={inter.className}>
           <Header />
-          <div className="m-auto text-xl font-bold text-center">
+          <h1 className="text-4xl font-semibold text-center">
+            Welcome to Smart Recipes
+          </h1>
+          <div className="m-auto text-xl font-bold text-center mt-4">
             Please Login to Access Site
           </div>
         </body>
