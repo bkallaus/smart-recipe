@@ -22,3 +22,9 @@ export type FullRecipe = Recipe & {
   steps: Steps[];
   is_favorite: boolean;
 };
+
+export type RecipeCard = {
+  uuid: string;
+  name: string;
+  description: string;
+};

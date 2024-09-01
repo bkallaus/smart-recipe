@@ -1,6 +1,6 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { toggleFavoriteRecipe } from "@/server-actions/recipes";
+import { toggleFavoriteRecipe } from "@/server-actions/favorite-recipes";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -12,7 +12,6 @@ const FavoriteButton = ({
   isFavorite: boolean;
 }) => {
   const router = useRouter();
-  console.log("isFavorite", isFavorite);
   const [isLoading, setIsLoading] = useState(false);
 
   const onToggle = async () => {

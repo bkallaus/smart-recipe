@@ -1,7 +1,7 @@
-import type { Recipe } from "@/types/recipe";
+import type { RecipeCard } from "@/types/recipe";
 import { titleCase } from "title-case";
 
-const RecipeRow = ({ recipes }: { recipes: Recipe[] }) => {
+const RecipeRow = ({ recipes }: { recipes: RecipeCard[] }) => {
   return (
     <div className="grid md:grid-cols-3 gap-4 lg:gap-10">
       {recipes.map((recipe) => (

@@ -1,13 +1,13 @@
-'use client';
-import { searchRecipes } from '@/server-actions/recipes';
-import type { Recipe } from '@/types/recipe';
-import { useEffect, useState } from 'react';
-import { useDebounce } from 'use-debounce';
-import RecipeRow from './recipe-row';
+"use client";
+import { searchRecipes } from "@/server-actions/recipes";
+import type { RecipeCard } from "@/types/recipe";
+import { useEffect, useState } from "react";
+import { useDebounce } from "use-debounce";
+import RecipeRow from "./recipe-row";
 
 const SearchRecipes = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [recentRecipes, setRecentRecipes] = useState<Recipe[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [recentRecipes, setRecentRecipes] = useState<RecipeCard[]>([]);
 
   const [value] = useDebounce(searchTerm, 1000);
 
@@ -28,9 +28,9 @@ const SearchRecipes = () => {
   return (
     <div>
       <input
-        type='text'
-        placeholder='Search for recipes'
-        className='form-search'
+        type="text"
+        placeholder="Search for recipes"
+        className="form-search"
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />

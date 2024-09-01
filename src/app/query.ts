@@ -3,6 +3,7 @@ import { insertRecipe } from '@/server-actions/recipes';
 import ogs from 'open-graph-scraper';
 import { convertJsonLdToIngest } from '../helpers/ingest-helper';
 import { downloadUploadImage } from '@/helpers/image-helpers';
+import { toggleFavoriteRecipe } from '@/server-actions/favorite-recipes';
 
 export const getJson = async (url: string) => {
   const options = {
@@ -41,6 +42,8 @@ export const ingestRecipe = async (url: string, uuid?: string) => {
   }
 
   const result = await insertRecipe(mappedRecipe, uuid);
+
+  await toggleFavoriteRecipe(result.uuid);
 
   return result.uuid;
 };

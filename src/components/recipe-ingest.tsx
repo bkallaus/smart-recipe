@@ -7,7 +7,7 @@ import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { insertIntoFailedIngest } from "@/server-actions/recipes";
 
-const RecipeIngest = () => {
+const useRecipeIngest = () => {
   const { toast } = useToast();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -48,6 +48,15 @@ const RecipeIngest = () => {
       setLoading(false);
     }
   };
+
+  return {
+    onMagicIngest,
+    loading,
+  };
+};
+
+const RecipeIngest = () => {
+  const { onMagicIngest, loading } = useRecipeIngest();
 
   return (
     <div>
