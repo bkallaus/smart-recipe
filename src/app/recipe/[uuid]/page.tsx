@@ -7,6 +7,7 @@ import { titleCase } from "title-case";
 import StepsOrSections from "./steps-or-sections";
 import { Paper } from "@/components/paper";
 import { Fragment } from "react";
+import FavoriteButton from "./favorite-button";
 
 const IndividualRecipe = async ({
   params,
@@ -36,6 +37,7 @@ const IndividualRecipe = async ({
         <div className="h-5" />
         <div className="flex justify-between">
           <h1 className="text-xl font-semibold">{titleCase(recipe.name)}</h1>
+          <FavoriteButton uuid={recipe.uuid} isFavorite={recipe.is_favorite} />
           <Button asChild variant={"outline"}>
             <a href={recipe.url}>Original Recipe</a>
           </Button>

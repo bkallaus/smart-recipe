@@ -20,4 +20,5 @@ export type Steps = {
 export type FullRecipe = Recipe & {
   ingredients: string[];
   steps: Steps[];
+  is_favorite: boolean;
 };
