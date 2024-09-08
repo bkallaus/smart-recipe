@@ -1,5 +1,5 @@
 import RecipeRow from "@/components/recipe-row";
-import { getAllFavoriteRecipes } from "@/server-actions/recipes";
+import { getAllFavoriteRecipes } from "@/server-actions/favorite-recipes";
 
 const FavoritePage = async () => {
   const favoriteRecipes = await getAllFavoriteRecipes();
