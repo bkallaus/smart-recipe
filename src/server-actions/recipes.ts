@@ -152,3 +152,21 @@ export const insertIntoFailedIngest = async (url: string) => {
 
   await client.query('INSERT INTO failed_ingest (url) VALUES ($1)', [url]);
 };
+
+export const editRecipe = async (recipe: FullRecipe, id: number) => {
+  const client = await getClient();
+
+  await client.query(
+    'UPDATE recipe SET name = $1, description = $2, url = $3, primary_image = $4, cuisine = $5, category = $6, keywords = $7 WHERE id = $8',
+    [
+      recipe.name,
+      recipe.description,
+      recipe.url,
+      recipe.primary_image,
+      recipe.cuisine,
+      recipe.category,
+      recipe.keywords,
+      id,
+    ],
+  );
+};
