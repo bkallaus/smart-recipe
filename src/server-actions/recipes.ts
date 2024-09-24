@@ -76,6 +76,7 @@ export const insertRecipe = async (recipe: IngestRecipe, uuid?: string) => {
   let recipeId: number;
 
   try {
+    console.log(recipe);
     await client.query('BEGIN');
 
     if (uuid) {
@@ -117,18 +118,20 @@ export const insertRecipe = async (recipe: IngestRecipe, uuid?: string) => {
       );
     });
 
-    const instructionsInsert = recipe.steps.map((instruction, index) => {
-      return client.query(
-        'INSERT INTO steps (recipe_id, label, text, sort, section) VALUES ($1, $2, $3, $4, $5)',
-        [
-          recipeId,
-          instruction.label ? instruction.label : instruction.text,
-          instruction.text ?? '',
-          index,
-          instruction.section,
-        ],
-      );
-    });
+    const instructionsInsert = recipe.steps
+      .filter((instruction) => instruction.label || instruction.text)
+      .map((instruction, index) => {
+        return client.query(
+          'INSERT INTO steps (recipe_id, label, text, sort, section) VALUES ($1, $2, $3, $4, $5)',
+          [
+            recipeId,
+            instruction.label ? instruction.label : instruction.text,
+            instruction.text ?? '',
+            index,
+            instruction.section,
+          ],
+        );
+      });
 
     await Promise.all([...ingredientsInsert, ...instructionsInsert]);
     await client.query('COMMIT');
