@@ -3,9 +3,12 @@ import { InputWithLabel } from "@/components/input-with-label";
 import { Button } from "@/components/ui/button";
 import { editRecipe } from "@/server-actions/recipes";
 import type { FullRecipe } from "@/types/recipe";
+import { useRouter } from "next/navigation";
+import { use } from "react";
 import { useForm } from "react-hook-form";
 
 const RecipeForm = ({ recipe }: { recipe: FullRecipe }) => {
+  const router = useRouter();
   const {
     register,
     control,
@@ -17,6 +20,7 @@ const RecipeForm = ({ recipe }: { recipe: FullRecipe }) => {
 
   const onSubmit = async (data: FullRecipe) => {
     await editRecipe(data, recipe.id);
+    router.push(`/recipe/${recipe.uuid}`);
   };
 
   // const { fields: stepsFields } = useFieldArray({
@@ -40,41 +44,36 @@ const RecipeForm = ({ recipe }: { recipe: FullRecipe }) => {
       <InputWithLabel
         label="Description"
         {...register("description", {
-          required: true,
           maxLength: 500,
         })}
       />
       <InputWithLabel
         label="Primary Image"
         {...register("primary_image", {
-          maxLength: 100,
+          maxLength: 500,
         })}
       />
       <InputWithLabel
         label="Category"
         {...register("category", {
-          required: true,
           maxLength: 100,
         })}
       />
       <InputWithLabel
         label="Cuisine"
         {...register("cuisine", {
-          required: true,
           maxLength: 100,
         })}
       />
       <InputWithLabel
         label="Keywords"
         {...register("keywords", {
-          required: true,
           maxLength: 500,
         })}
       />
       <InputWithLabel
         label="URL"
         {...register("url", {
-          required: true,
           maxLength: 500,
         })}
       />
