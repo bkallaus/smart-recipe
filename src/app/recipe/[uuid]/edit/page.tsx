@@ -15,7 +15,6 @@ const EditRecipePage = async ({
 
   return (
     <div>
-      <h1>Edit Recipe</h1>
       <RecipeForm recipe={recipe} />
     </div>
   );

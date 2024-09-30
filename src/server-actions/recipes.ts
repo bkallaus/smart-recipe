@@ -76,7 +76,6 @@ export const insertRecipe = async (recipe: IngestRecipe, uuid?: string) => {
   let recipeId: number;
 
   try {
-    console.log(recipe);
     await client.query('BEGIN');
 
     if (uuid) {
@@ -159,17 +158,50 @@ export const insertIntoFailedIngest = async (url: string) => {
 export const editRecipe = async (recipe: FullRecipe, id: number) => {
   const client = await getClient();
 
-  await client.query(
-    'UPDATE recipe SET name = $1, description = $2, url = $3, primary_image = $4, cuisine = $5, category = $6, keywords = $7 WHERE id = $8',
-    [
-      recipe.name,
-      recipe.description,
-      recipe.url,
-      recipe.primary_image,
-      recipe.cuisine,
-      recipe.category,
-      recipe.keywords,
-      id,
-    ],
-  );
+  try {
+    await client.query('BEGIN');
+    await client.query(
+      'UPDATE recipe SET name = $1, description = $2, url = $3, primary_image = $4, cuisine = $5, category = $6, keywords = $7 WHERE id = $8',
+      [
+        recipe.name,
+        recipe.description,
+        recipe.url,
+        recipe.primary_image,
+        recipe.cuisine,
+        recipe.category,
+        recipe.keywords,
+        id,
+      ],
+    );
+
+    if (recipe.ingredients.length) {
+      await client.query('DELETE FROM ingredient WHERE recipe_id = $1', [id]);
+
+      const ingredientsInsert = recipe.ingredients.map((ingredient, index) => {
+        return client.query(
+          'INSERT INTO ingredient (recipe_id, label, sort) VALUES ($1, $2, $3)',
+          [id, ingredient, index],
+        );
+      });
+      await Promise.all(ingredientsInsert);
+    }
+
+    if (recipe.steps.length) {
+      await client.query('DELETE FROM steps WHERE recipe_id = $1', [id]);
+      const stepsInsert = recipe.steps.map((step, index) => {
+        return client.query(
+          'INSERT INTO steps (recipe_id, label, text, sort, section) VALUES ($1, $2, $3, $4, $5)',
+          [id, step.label, step.text, index, step.section],
+        );
+      });
+
+      await Promise.all(stepsInsert);
+    }
+  } catch (e) {
+    await client.query('ROLLBACK');
+
+    throw new Error('Error updating recipe');
+  } finally {
+    await client.query('COMMIT');
+  }
 };
