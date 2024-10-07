@@ -16,7 +16,7 @@ const GoogleSignIn = ({ userName }: { userName: string | undefined }) => {
         onSuccess={async (credentialResponse) => {
           setCookie("recipe-token", credentialResponse.credential, {
             maxAge: 900000,
-            sameSite: "strict",
+            sameSite: "lax",
             secure: true,
           });
 
