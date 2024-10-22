@@ -35,13 +35,14 @@ const IndividualRecipe = async ({
           />
         )}
         <div className="h-5" />
-        <div className="flex justify-between">
+        <div className="flex flex-col md:flex-row gap-3 justify-between">
           <h1 className="text-xl font-semibold">{titleCase(recipe.name)}</h1>
           <FavoriteButton uuid={recipe.uuid} isFavorite={recipe.is_favorite} />
           <Button asChild variant={"outline"}>
             <a href={recipe.url}>Original Recipe</a>
           </Button>
         </div>
+        <div className="h-5" />
         <div>
           <div className="flex gap-1">
             {recipe.cuisine && <Badge>{recipe.cuisine}</Badge>}
