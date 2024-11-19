@@ -38,7 +38,7 @@ const RecipeForm = ({ recipe }: { recipe: FullRecipe }) => {
           <h1>Edit Recipe</h1>
           <Button type="submit">Submit</Button>
         </div>
-        <div className="grid grid-cols-4 gap-3 ">
+        <div className="">
           <InputWithLabel
             label="Name"
             {...register("name", {
@@ -46,36 +46,42 @@ const RecipeForm = ({ recipe }: { recipe: FullRecipe }) => {
               maxLength: 100,
             })}
           />
+          <div className="h-3" />
           <InputWithLabel
             label="Description"
             {...register("description", {
               maxLength: 500,
             })}
           />
+          <div className="h-3" />
           <InputWithLabel
             label="Primary Image"
             {...register("primary_image", {
               maxLength: 500,
             })}
           />
+          <div className="h-3" />
           <InputWithLabel
             label="Category"
             {...register("category", {
               maxLength: 100,
             })}
           />
+          <div className="h-3" />
           <InputWithLabel
             label="Cuisine"
             {...register("cuisine", {
               maxLength: 100,
             })}
           />
+          <div className="h-3" />
           <InputWithLabel
             label="Keywords"
             {...register("keywords", {
               maxLength: 500,
             })}
           />
+          <div className="h-3" />
           <InputWithLabel
             label="URL"
             {...register("url", {
@@ -84,8 +90,8 @@ const RecipeForm = ({ recipe }: { recipe: FullRecipe }) => {
           />
         </div>
         <div className="h-3" />
-        <h2 className="text-center">Ingredients</h2>
-        <div className="grid grid-cols-3 gap-3">
+        <h2>Ingredients</h2>
+        <div className="">
           <Controller
             name="ingredients"
             control={control}
@@ -107,7 +113,9 @@ const RecipeForm = ({ recipe }: { recipe: FullRecipe }) => {
                       </Button>
                     </div>
                   ))}
+                  <div className="h-3" />
                   <Button
+                    className="m-auto"
                     type="button"
                     onClick={() => field.onChange([...field.value, ""])}
                   >
@@ -119,35 +127,40 @@ const RecipeForm = ({ recipe }: { recipe: FullRecipe }) => {
           />
         </div>
         <div className="h-3" />
-        <h2 className="text-center">Steps</h2>
+        <h2>Steps</h2>
         <div>
           {stepsFields.map((step, i) => (
-            <div key={step.id} className="flex gap-3 items-end mb-1">
+            <div key={step.id} className="w-200">
+              <div className="h-6" />
               <InputWithLabel
-                label={!i ? "Label" : ""}
+                label={"Label"}
                 {...register(`steps.${i}.label`, {
                   required: true,
                   maxLength: 1000,
                 })}
               />
+              <div className="h-3" />
               <InputWithLabel
-                label={!i ? "Text" : ""}
+                label={"Text"}
                 {...register(`steps.${i}.text`, {
                   maxLength: 1000,
                 })}
               />
+              <div className="h-3" />
               <InputWithLabel
-                label={!i ? "Section" : ""}
+                label={"Section"}
                 {...register(`steps.${i}.section`, {
                   maxLength: 500,
                 })}
               />
+              <div className="h-3" />
               <Button type="button" onClick={() => remove(i)}>
                 Remove
               </Button>
             </div>
           ))}
         </div>
+        <div className="h-3" />
         <Button
           type="button"
           onClick={() =>
