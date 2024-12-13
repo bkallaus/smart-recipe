@@ -8,6 +8,7 @@ import StepsOrSections from "./steps-or-sections";
 import { Paper } from "@/components/paper";
 import { Fragment } from "react";
 import FavoriteButton from "./favorite-button";
+import { WakeLockButton } from "@/components/wake-lock";
 
 const IndividualRecipe = async ({
   params,
@@ -41,6 +42,7 @@ const IndividualRecipe = async ({
           <Button asChild variant={"outline"}>
             <a href={recipe.url}>Original Recipe</a>
           </Button>
+          <WakeLockButton />
         </div>
         <div className="h-5" />
         <div>

@@ -31,6 +31,7 @@
 		"react-cookie": "^7.2.0",
 		"react-dom": "^18",
 		"react-hook-form": "^7.53.0",
+		"react-screen-wake-lock": "^3.0.2",
 		"tailwind-merge": "^2.4.0",
 		"tailwindcss-animate": "^1.0.7",
 		"title-case": "^4.3.1",
