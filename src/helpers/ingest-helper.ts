@@ -1,3 +1,4 @@
+import { askAI } from '@/server-actions/gemini';
 import type { IngestRecipe, Instruction } from '@/types/ingest';
 
 type IngestInstruction = {
@@ -138,4 +139,24 @@ export const convertJsonLdToIngest = async (
   const mappedRecipe = convertRecipe(foundRecipe as RecipeJson, originalUrl);
 
   return mappedRecipe;
+};
+
+export const smartIngest = async (
+  jsonLd: any,
+): Promise<IngestRecipe | null> => {
+  const prompt: string = `Convert the following jsonld recipe to json ensure to sort the ingredients into the correct sections by InstructionsWithItems.name
+
+    ${JSON.stringify(jsonLd)}
+  `;
+
+  try {
+    const result: string = await askAI(prompt);
+
+    const parsed = JSON.parse(result);
+
+    return parsed;
+  } catch (error) {
+    console.error(error);
+  }
+  return null;
 };

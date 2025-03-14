@@ -8,9 +8,9 @@ const RecipeRow = ({ recipes }: { recipes: RecipeCard[] }) => {
         <a key={`recipe-${recipe.uuid}`} href={`/recipe/${recipe.uuid}`}>
           <div className="bg-white p-4 rounded-md shadow-md h-full">
             {/* <img
-            src={recipe.heroImage}
-            alt={recipe.name}
-            className="w-full h-48 object-cover rounded-md"
+              src={recipe.heroImage}
+              alt={recipe.name}
+              className="w-full h-48 object-cover rounded-md"
             /> */}
             <h2 className="text-xl font-semibold mt-4 line-clamp-1">
               {titleCase(recipe.name)}

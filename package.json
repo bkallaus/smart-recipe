@@ -10,6 +10,7 @@
 	},
 	"dependencies": {
 		"@aws-sdk/client-s3": "^3.626.0",
+		"@google/generative-ai": "^0.21.0",
 		"@radix-ui/react-label": "^2.1.0",
 		"@radix-ui/react-slot": "^1.1.0",
 		"@radix-ui/react-toast": "^1.2.1",
@@ -32,6 +33,7 @@
 		"react-dom": "^18",
 		"react-hook-form": "^7.53.0",
 		"react-screen-wake-lock": "^3.0.2",
+		"server-only": "^0.0.1",
 		"tailwind-merge": "^2.4.0",
 		"tailwindcss-animate": "^1.0.7",
 		"title-case": "^4.3.1",

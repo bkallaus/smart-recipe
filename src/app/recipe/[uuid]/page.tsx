@@ -1,4 +1,5 @@
 import RecipeIngestButton from "@/components/reingest-button";
+import SmartReIngestButton from "@/components/smart-reingest-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getFullRecipeById } from "@/server-actions/recipes";
@@ -69,7 +70,10 @@ const IndividualRecipe = async ({
         </Paper>
       </div>
       <div className="mb-3">Missing information?</div>
-      <RecipeIngestButton recipe={recipe} />
+      <div className="flex gap-3">
+        <RecipeIngestButton recipe={recipe} />
+        <SmartReIngestButton recipe={recipe} />
+      </div>
     </main>
   );
 };

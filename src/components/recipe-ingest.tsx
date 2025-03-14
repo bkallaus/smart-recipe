@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useToast } from "./ui/use-toast";
 import { Button } from "./ui/button";
 import { useState } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader2, Sparkles } from "lucide-react";
 import { insertIntoFailedIngest } from "@/server-actions/recipes";
 
 const useRecipeIngest = () => {
@@ -62,7 +62,7 @@ const RecipeIngest = () => {
     <div>
       <Button type="button" disabled={loading} onClick={onMagicIngest}>
         {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-        Ingest Recipe
+        <Sparkles className="mr-1" /> Smart Ingest Recipe
       </Button>
     </div>
   );
