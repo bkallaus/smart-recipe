@@ -45,7 +45,9 @@ const SearchRecipes = () => {
           </div>
         </div>
       </section>
-      <RecipeRow recipes={recentRecipes} />
+      <div className="p-12 md:p-24 text-center">
+        <RecipeRow recipes={recentRecipes} />
+      </div>
     </div>
   );
 };

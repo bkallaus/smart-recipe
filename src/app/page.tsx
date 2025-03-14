@@ -11,7 +11,7 @@ const Home = async () => {
     <main className="flex min-h-screen flex-col items-center justify-between">
       <div>
         <SearchRecipes />
-        <div className="p-24 text-center">
+        <div className="p-12 md:p-24  text-center">
           <div className="h-5" />
           {recentRecipes.length && (
             <>
