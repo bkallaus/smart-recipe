@@ -7,6 +7,7 @@ import type { Metadata, Viewport } from "next";
 
 import { getRecentRecipes } from "@/server-actions/recipes";
 import RecipeRow from "@/components/recipe-row";
+import { Analytics } from "@vercel/analytics/react";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -113,6 +114,7 @@ export default async function RootLayout({
             </section>
           </main>
         </body>
+        <Analytics />
       </html>
     );
   }
@@ -124,6 +126,7 @@ export default async function RootLayout({
         {children}
         <Toaster />
       </body>
+      <Analytics />
     </html>
   );
 }
