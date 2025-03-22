@@ -25,7 +25,7 @@ const IndividualRecipe = async ({
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
+    <main className="flex min-h-screen flex-col items-center justify-between p-3 lg:p-24 ">
       <div>
         {recipe.primary_image?.includes("supabase") && (
           <img
