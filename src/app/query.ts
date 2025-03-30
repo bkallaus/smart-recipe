@@ -59,9 +59,7 @@ export const smartIngestRecipe = async (url: string, uuid?: string) => {
     throw new Error('Could not ingest recipe');
   }
 
-  const json = results.result.jsonLD;
-
-  const mappedRecipe = await smartIngest(json);
+  const mappedRecipe = await smartIngest(results);
 
   if (!mappedRecipe) {
     throw new Error('Could not parse recipe');
