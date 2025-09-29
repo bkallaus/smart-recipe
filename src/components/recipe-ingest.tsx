@@ -6,27 +6,26 @@ import { Button } from "./ui/button";
 import { useState } from "react";
 import { Loader2, Sparkles } from "lucide-react";
 import { insertIntoFailedIngest } from "@/server-actions/recipes";
+import { Input } from "./ui/input";
 
 const useRecipeIngest = () => {
   const { toast } = useToast();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const onMagicIngest = async () => {
-    const clipboardUrl = await navigator.clipboard.readText();
-
+  const onMagicIngest = async (url: string) => {
     try {
       setLoading(true);
 
-      if (!clipboardUrl?.includes("https://")) {
+      if (!url?.includes("https://")) {
         toast({
           title: "Invalid URL",
-          description: `${clipboardUrl} is not valid. Please copy a valid URL`,
+          description: `${url} is not valid. Please copy a valid URL`,
         });
 
         return null;
       }
 
-      const recipeId = await ingestRecipe(clipboardUrl);
+      const recipeId = await ingestRecipe(url);
 
       toast({
         title: "Ingested Recipe",
@@ -36,8 +35,8 @@ const useRecipeIngest = () => {
       router.push(`/recipe/${recipeId}`);
     } catch (error) {
       console.error("failed to ingest:", error);
-      if (clipboardUrl) {
-        await insertIntoFailedIngest(clipboardUrl);
+      if (url) {
+        await insertIntoFailedIngest(url);
       }
       toast({
         title: "Error Ingesting Recipe",
@@ -57,10 +56,20 @@ const useRecipeIngest = () => {
 
 const RecipeIngest = () => {
   const { onMagicIngest, loading } = useRecipeIngest();
+  const [url, setUrl] = useState("");
 
   return (
-    <div>
-      <Button type="button" disabled={loading} onClick={onMagicIngest}>
+    <div className="flex gap-3">
+      <Input
+        placeholder="Enter recipe URL"
+        onChange={(e) => setUrl(e.target.value)}
+        value={url}
+      />
+      <Button
+        type="button"
+        disabled={loading}
+        onClick={() => onMagicIngest(url)}
+      >
         {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
         <Sparkles className="mr-1" /> Smart Ingest Recipe
       </Button>
