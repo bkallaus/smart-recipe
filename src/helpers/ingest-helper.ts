@@ -153,9 +153,18 @@ export const convertJsonLdToIngest = async (
 export const smartIngest = async (
   jsonLd: any,
 ): Promise<IngestRecipe | null> => {
-  const prompt: string = `Convert the following jsonld recipe to json ensure to sort the ingredients into the correct sections by InstructionsWithItems.name
+  const prompt: string = `Convert the following recipe data to a standardized JSON format.
 
-    ${JSON.stringify(jsonLd)}
+  Please extract the following fields if available:
+  - Name, Description, Hero Image URL, URL
+  - Cuisine (list of strings), Category (list of strings), Keywords (list of strings)
+  - Ingredients (list of strings)
+  - Steps (list of objects with label, text, section). Sort ingredients into correct sections if applicable.
+  - Prep Time, Cook Time, Total Time (in ISO 8601 duration format if possible, e.g., PT1H)
+  - Recipe Yield (e.g., "4 servings")
+
+  Here is the data:
+  ${JSON.stringify(jsonLd)}
   `;
 
   try {
