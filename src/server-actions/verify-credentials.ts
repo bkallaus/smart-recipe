@@ -6,8 +6,8 @@ import type { User } from '@/types/user';
 
 const client = new OAuth2Client();
 
-const getToken = () => {
-    const cookie = cookies();
+const getToken = async () => {
+    const cookie = await cookies();
 
     const recipeToken = cookie.get('recipe-token');
 
@@ -16,7 +16,7 @@ const getToken = () => {
 
 // When should I verify?
 const verifyCookies = async (): Promise<string | null> => {
-    const recipeToken = getToken();
+    const recipeToken = await getToken();
 
     if (!recipeToken?.value) {
         return null;
@@ -37,8 +37,8 @@ const verifyCookies = async (): Promise<string | null> => {
     return payload.email;
 };
 
-export const getEmail = () => {
-    const recipeToken = getToken();
+export const getEmail = async () => {
+    const recipeToken = await getToken();
 
     if (!recipeToken?.value) {
         return null;
@@ -49,8 +49,8 @@ export const getEmail = () => {
     return decoded.name;
 };
 
-export const getUser = (): User | null => {
-    const recipeToken = getToken();
+export const getUser = async (): Promise<User | null> => {
+    const recipeToken = await getToken();
 
     if (!recipeToken?.value) {
         return null;
@@ -67,8 +67,8 @@ export const getUser = (): User | null => {
     };
 };
 
-export const hasAccess = () => {
-    const recipeToken = getToken();
+export const hasAccess = async () => {
+    const recipeToken = await getToken();
 
     return !!recipeToken?.value;
 };

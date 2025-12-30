@@ -1,9 +1,9 @@
-import { GoogleGenerativeAI, SchemaType } from '@google/generative-ai';
+import { GoogleGenerativeAI, SchemaType, type Schema } from '@google/generative-ai';
 import 'server-only';
 
 const genAI = new GoogleGenerativeAI(process.env.API_KEY as string);
 
-const RecipeJsonSchema = {
+const RecipeJsonSchema: Schema = {
   description: 'Recipe format',
   type: SchemaType.OBJECT,
   properties: {

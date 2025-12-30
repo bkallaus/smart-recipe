@@ -1,7 +1,10 @@
-import { describe } from 'node:test';
-
-import { expect, test } from 'vitest';
+import { describe, expect, test, vi } from 'vitest';
 import { findRecipeIngredients } from '../ingest-helper';
+
+// Mock the server action to avoid importing server-only code
+vi.mock('@/server-actions/gemini', () => ({
+  askAI: vi.fn(),
+}));
 
 const BaseJson = {
   '@type': 'Recipe',

@@ -14,11 +14,12 @@ import { WakeLockButton } from "@/components/wake-lock";
 const IndividualRecipe = async ({
   params,
 }: {
-  params: {
+  params: Promise<{
     uuid: string;
-  };
+  }>;
 }) => {
-  const recipe = await getFullRecipeById(params.uuid);
+  const { uuid } = await params;
+  const recipe = await getFullRecipeById(uuid);
 
   if (!recipe) {
     notFound();
