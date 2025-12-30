@@ -144,10 +144,23 @@ export const convertJsonLdToIngest = async (
 export const smartIngest = async (
   jsonLd: any,
 ): Promise<IngestRecipe | null> => {
-  const prompt: string = `Convert the following jsonld recipe to json ensure to sort the ingredients into the correct sections by InstructionsWithItems.name
+  const prompt: string = `Convert the following jsonld recipe data into a structured JSON format. 
 
-    ${JSON.stringify(jsonLd)}
-  `;
+### Instructions:
+1.  **Metadata Extraction**: 
+    - Extract \`yield\`, \`prepTime\`, \`cookTime\`, and \`totalTime\` if available.
+    - Append these details to the start of the \`description\` field in a human-readable format (e.g., "Yield: 4 servings | Prep: 10 mins | Cook: 30 mins").
+2.  **Ingredients**:
+    - If ingredients are grouped into sections (e.g., "For the crust", "For the filling"), prefix each ingredient with its section name in brackets, like: "[Crust] 1 cup flour".
+    - If no sections exist, provide the plain ingredient strings.
+3.  **Instructions/Steps**:
+    - Ensure steps are sorted correctly by their \`position\`.
+    - If steps are grouped by \`InstructionsWithItems.name\`, use that name as the \`section\` field for each step in that group.
+4.  **Taxonomy**:
+    - Provide a concise \`category\` (e.g., "Dessert"), \`cuisine\` (e.g., "Italian"), and \`keywords\` (comma-separated).
+
+### JSONLD Data:
+${JSON.stringify(jsonLd)}`;
 
   try {
     const result: string = await askAI(prompt);
