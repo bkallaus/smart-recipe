@@ -15,15 +15,19 @@ type InstructionsWithItems = {
 
 type RecipeJson = {
   name: string;
-  recipeCuisine: string;
-  recipeCategory: string;
-  keywords: string;
+  recipeCuisine: string | string[];
+  recipeCategory: string | string[];
+  keywords: string | string[];
   headline: string;
   description: string;
   recipeIngredient: string[];
   recipeInstructions: (IngestInstruction | InstructionsWithItems)[];
   image: string | string[] | { url: string };
   thumbnailUrl: string;
+  prepTime?: string;
+  cookTime?: string;
+  totalTime?: string;
+  recipeYield?: string | number;
 };
 
 const getInstructionFromItem = (item: IngestInstruction): Instruction => {
@@ -82,16 +86,17 @@ const convertRecipe = (
     : recipeJson.image;
 
   const cuisine = Array.isArray(recipeJson.recipeCuisine)
-    ? recipeJson.recipeCuisine.join(', ')
-    : recipeJson.recipeCuisine;
+    ? recipeJson.recipeCuisine
+    : recipeJson.recipeCuisine ? [recipeJson.recipeCuisine] : [];
 
   const category = Array.isArray(recipeJson.recipeCategory)
-    ? recipeJson.recipeCategory.join(', ')
-    : recipeJson.recipeCategory;
+    ? recipeJson.recipeCategory
+    : recipeJson.recipeCategory ? [recipeJson.recipeCategory] : [];
 
   const keywords = Array.isArray(recipeJson.keywords)
-    ? recipeJson.keywords.join(', ')
-    : recipeJson.keywords;
+    ? recipeJson.keywords
+    : recipeJson.keywords ? [recipeJson.keywords] : [];
+
   return {
     cuisine,
     category,
@@ -102,6 +107,10 @@ const convertRecipe = (
     description,
     ingredients,
     steps,
+    prepTime: recipeJson.prepTime,
+    cookTime: recipeJson.cookTime,
+    totalTime: recipeJson.totalTime,
+    recipeYield: recipeJson.recipeYield,
   };
 };
 

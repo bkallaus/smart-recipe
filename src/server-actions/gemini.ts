@@ -8,13 +8,22 @@ const RecipeJsonSchema = {
   type: SchemaType.OBJECT,
   properties: {
     category: {
-      type: SchemaType.STRING,
+      type: SchemaType.ARRAY,
+      items: {
+        type: SchemaType.STRING,
+      },
     },
     cuisine: {
-      type: SchemaType.STRING,
+      type: SchemaType.ARRAY,
+      items: {
+        type: SchemaType.STRING,
+      },
     },
     keywords: {
-      type: SchemaType.STRING,
+      type: SchemaType.ARRAY,
+      items: {
+        type: SchemaType.STRING,
+      },
     },
     name: {
       type: SchemaType.STRING,
@@ -50,6 +59,18 @@ const RecipeJsonSchema = {
       },
     },
     url: {
+      type: SchemaType.STRING,
+    },
+    prepTime: {
+      type: SchemaType.STRING,
+    },
+    cookTime: {
+      type: SchemaType.STRING,
+    },
+    totalTime: {
+      type: SchemaType.STRING,
+    },
+    recipeYield: {
       type: SchemaType.STRING,
     },
   },

@@ -78,6 +78,18 @@ export const insertRecipe = async (recipe: IngestRecipe, uuid?: string) => {
   try {
     await client.query('BEGIN');
 
+    // Convert arrays to comma-separated strings for database compatibility
+    const cuisine = recipe.cuisine.join(', ');
+    const category = recipe.category.join(', ');
+    const keywords = recipe.keywords.join(', ');
+
+    // TODO: Add support for saving prepTime, cookTime, totalTime, recipeYield to the database
+    // The fields are available in the 'recipe' object:
+    // recipe.prepTime
+    // recipe.cookTime
+    // recipe.totalTime
+    // recipe.recipeYield
+
     if (uuid) {
       const recipeResult = await client.query(
         'INSERT INTO recipe (name, description, url, primary_image, cuisine, category, keywords, uuid) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id',
@@ -86,9 +98,9 @@ export const insertRecipe = async (recipe: IngestRecipe, uuid?: string) => {
           recipe.description,
           recipe.url,
           recipe.heroImage,
-          recipe.cuisine,
-          recipe.category,
-          recipe.keywords,
+          cuisine,
+          category,
+          keywords,
           uuid,
         ],
       );
@@ -102,9 +114,9 @@ export const insertRecipe = async (recipe: IngestRecipe, uuid?: string) => {
           recipe.description,
           recipe.url,
           recipe.heroImage,
-          recipe.cuisine,
-          recipe.category,
-          recipe.keywords,
+          cuisine,
+          category,
+          keywords,
         ],
       );
       recipeId = recipeResult.rows[0].id;
