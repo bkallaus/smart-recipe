@@ -8,13 +8,22 @@ const RecipeJsonSchema = {
   type: SchemaType.OBJECT,
   properties: {
     category: {
-      type: SchemaType.STRING,
+      type: SchemaType.ARRAY,
+      items: {
+        type: SchemaType.STRING,
+      },
     },
     cuisine: {
-      type: SchemaType.STRING,
+      type: SchemaType.ARRAY,
+      items: {
+        type: SchemaType.STRING,
+      },
     },
     keywords: {
-      type: SchemaType.STRING,
+      type: SchemaType.ARRAY,
+      items: {
+        type: SchemaType.STRING,
+      },
     },
     name: {
       type: SchemaType.STRING,
@@ -52,6 +61,18 @@ const RecipeJsonSchema = {
     url: {
       type: SchemaType.STRING,
     },
+    prepTime: {
+      type: SchemaType.STRING,
+    },
+    cookTime: {
+      type: SchemaType.STRING,
+    },
+    totalTime: {
+      type: SchemaType.STRING,
+    },
+    recipeYield: {
+      type: SchemaType.STRING,
+    },
   },
   required: [
     'category',
@@ -69,7 +90,10 @@ const RecipeJsonSchema = {
 export const askAI = async (prompt: string) => {
   const model = genAI.getGenerativeModel({
     model: 'gemini-2.0-flash-001',
+    systemInstruction:
+      'You are an expert recipe parser. Your goal is to extract recipe information from the provided text or JSON and format it according to the specified JSON schema. Ensure all fields are populated as accurately as possible. If a field is missing, try to infer it from the context if possible, otherwise leave it empty.',
     generationConfig: {
+      temperature: 0.1,
       responseMimeType: 'application/json',
       responseSchema: RecipeJsonSchema,
     },
