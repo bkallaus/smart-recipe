@@ -2,8 +2,8 @@
 import { insertRecipe } from '@/server-actions/recipes';
 import ogs from 'open-graph-scraper';
 import { convertJsonLdToIngest, smartIngest } from '../helpers/ingest-helper';
-import { downloadUploadImage } from '@/helpers/image-helpers';
 import { toggleFavoriteRecipe } from '@/server-actions/favorite-recipes';
+import { downloadUploadImage } from '@/server-actions/image-service';
 
 export const getJson = async (url: string) => {
   const options = {

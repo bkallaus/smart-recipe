@@ -14,8 +14,10 @@ const SmartReIngestButton = ({ recipe }: { recipe: FullRecipe }) => {
   const rescanRecipe = async () => {
     try {
       setLoading(true);
-      const newUrl = await smartIngestRecipe(recipe.url, recipe.uuid);
+
       await deleteRecipe(recipe.id);
+
+      const newUrl = await smartIngestRecipe(recipe.url, recipe.uuid);
 
       toast({
         title: "Recipe Updated",
