@@ -1,6 +1,6 @@
 "use client";
-import { smartIngestRecipe } from "@/app/query";
-import { deleteRecipe, insertIntoFailedIngest } from "@/server-actions/recipes";
+import { smartRescanRecipe } from "@/app/query";
+import { insertIntoFailedIngest } from "@/server-actions/recipes";
 import type { FullRecipe } from "@/types/recipe";
 import { Button } from "./ui/button";
 import { useState } from "react";
@@ -15,9 +15,7 @@ const SmartReIngestButton = ({ recipe }: { recipe: FullRecipe }) => {
     try {
       setLoading(true);
 
-      await deleteRecipe(recipe.id);
-
-      const newUrl = await smartIngestRecipe(recipe.url, recipe.uuid);
+      const newUrl = await smartRescanRecipe(recipe.id, recipe.url, recipe.uuid);
 
       toast({
         title: "Recipe Updated",

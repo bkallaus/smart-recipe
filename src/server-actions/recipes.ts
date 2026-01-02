@@ -197,11 +197,10 @@ export const editRecipe = async (recipe: FullRecipe, id: number) => {
 
       await Promise.all(stepsInsert);
     }
+    await client.query('COMMIT');
   } catch (e) {
     await client.query('ROLLBACK');
 
     throw new Error('Error updating recipe');
-  } finally {
-    await client.query('COMMIT');
   }
 };
