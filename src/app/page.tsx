@@ -2,6 +2,7 @@ import RecipeRow from "@/components/recipe-row";
 import SearchRecipes from "@/components/search-recipes";
 import { getFavoriteRecipes } from "@/server-actions/favorite-recipes";
 import { getRecentRecipes } from "@/server-actions/recipes";
+import Link from "next/link";
 
 const Home = async () => {
   const recentRecipes = await getRecentRecipes(6);
@@ -15,11 +16,11 @@ const Home = async () => {
           <div className="h-5" />
           {recentRecipes.length && (
             <>
-              <a href="/favorite">
+              <Link href="/favorite">
                 <h2 className="text-2xl font-semibold mt-8 hover:underline">
                   Favorite Recipes
                 </h2>
-              </a>
+              </Link>
               <RecipeRow recipes={favoriteRecipes} />
             </>
           )}

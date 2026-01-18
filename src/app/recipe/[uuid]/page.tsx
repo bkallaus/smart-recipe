@@ -39,7 +39,12 @@ const IndividualRecipe = async ({
         )}
         <div className="h-5" />
         <div className="flex flex-col md:flex-row gap-3 justify-between">
-          <h1 className="text-xl font-semibold">{titleCase(recipe.name)}</h1>
+          <h1
+            className="text-xl font-semibold"
+            style={{ viewTransitionName: `recipe-title-${recipe.uuid}` }}
+          >
+            {titleCase(recipe.name)}
+          </h1>
           <FavoriteButton uuid={recipe.uuid} isFavorite={recipe.is_favorite} />
           <Button asChild variant={"outline"}>
             <a href={recipe.url}>Original Recipe</a>
