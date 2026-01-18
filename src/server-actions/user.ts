@@ -1,18 +1,24 @@
 'use server';
-import { getClient } from './pg-client';
+import { db } from '@/lib/db';
 import { getUser } from './verify-credentials';
 
 export const upsertUser = async () => {
     const user = await getUser();
 
-    if (!user) {
+    if (!user?.email) {
         return;
     }
 
-    const client = await getClient();
-
-    await client.query(
-        'INSERT INTO users (email, name) VALUES ($1, $2) ON CONFLICT (email) DO UPDATE set name = $2',
-        [user.email, user.name],
-    );
+    await db
+        .insertInto('users')
+        .values({
+            email: user.email,
+            name: user.name,
+        })
+        .onConflict((oc) =>
+            oc.column('email').doUpdateSet({
+                name: user.name,
+            }),
+        )
+        .execute();
 };

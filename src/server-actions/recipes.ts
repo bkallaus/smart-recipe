@@ -1,207 +1,240 @@
 'use server';
-import type { FullRecipe, RecipeCard } from '@/types/recipe';
+import { db } from '@/lib/db';
 import type { IngestRecipe } from '@/types/ingest';
-import { getClient } from './pg-client';
+import type { FullRecipe, RecipeCard } from '@/types/recipe';
 import { getUser } from './verify-credentials';
 
 export const getRecentRecipes = async (limit = 15): Promise<RecipeCard[]> => {
-  const client = await getClient();
+  const recipes = await db
+    .selectFrom('recipe')
+    .select(['uuid', 'name', 'description'])
+    .orderBy('id', 'desc')
+    .limit(limit)
+    .execute();
 
-  const result = await client.query(
-    'SELECT uuid, name, description FROM recipe order by id desc LIMIT $1',
-    [limit],
-  );
-
-  return result.rows;
+  return recipes.map((r) => ({
+    ...r,
+    description: r.description ?? '',
+  }));
 };
 
 export const getRecipeById = async (id: number) => {
-  const client = await getClient();
-
-  const result = await client.query('SELECT * FROM recipe WHERE id = $1', [id]);
-
-  return result.rows[0];
+  return await db
+    .selectFrom('recipe')
+    .selectAll()
+    .where('id', '=', id.toString())
+    .executeTakeFirst();
 };
 
 export const searchRecipes = async (search: string): Promise<RecipeCard[]> => {
-  const client = await getClient();
+  const recipes = await db
+    .selectFrom('recipe')
+    .select(['uuid', 'name', 'description'])
+    .where('name', 'ilike', `%${search}%`)
+    .limit(30)
+    .execute();
 
-  const result = await client.query(
-    'SELECT uuid, name, description FROM recipe WHERE name ILIKE $1 limit 30',
-    [`%${search}%`],
-  );
-
-  return result.rows;
+  return recipes.map((r) => ({
+    ...r,
+    description: r.description ?? '',
+  }));
 };
 
 export const getFullRecipeById = async (
   uuid: string,
 ): Promise<FullRecipe | null> => {
-  const client = await getClient();
   const user = await getUser();
 
-  const result = await client.query(
-    `SELECT r.*, u.email is not null as is_favorite
-    from recipe r
-    left join user_recipe ur on r.id = ur.recipe_id
-    left join users u on ur.user_id = u.id and u.email = $2
-    where r.uuid = $1
-    `,
-    [uuid, user?.email],
-  );
+  const recipe = await db
+    .selectFrom('recipe as r')
+    .selectAll('r')
+    .select((eb) =>
+      eb
+        .case()
+        .when(
+          eb.exists(
+            eb
+              .selectFrom('users as u')
+              .innerJoin('user_recipe as ur', 'u.id', 'ur.user_id')
+              .whereRef('ur.recipe_id', '=', 'r.id')
+              .where('u.email', '=', user?.email ?? ''),
+          ),
+        )
+        .then(true)
+        .else(false)
+        .end()
+        .as('is_favorite'),
+    )
+    .where('r.uuid', '=', uuid)
+    .executeTakeFirst();
 
-  const recipeId = result.rows[0].id;
-  const ingredients = await client.query(
-    'SELECT * FROM ingredient WHERE recipe_id = $1 ORDER BY sort',
-    [recipeId],
-  );
-  const steps = await client.query(
-    'SELECT label, section, text, sort FROM steps WHERE recipe_id = $1 ORDER BY sort asc',
-    [recipeId],
-  );
-
-  if (!result?.rows.length) {
+  if (!recipe) {
     return null;
   }
 
+  const recipeId = recipe.id;
+
+  const ingredients = await db
+    .selectFrom('ingredient')
+    .selectAll()
+    .where('recipe_id', '=', Number(recipeId))
+    .orderBy('sort')
+    .execute();
+
+  const steps = await db
+    .selectFrom('steps')
+    .select(['label', 'section', 'text', 'sort'])
+    .where('recipe_id', '=', Number(recipeId))
+    .orderBy('sort', 'asc')
+    .execute();
+
   return {
-    ...result.rows[0],
-    ingredients: ingredients.rows.map((row) => row.label),
-    steps: steps.rows,
+    ...recipe,
+    id: Number(recipe.id),
+    name: recipe.name,
+    description: recipe.description ?? '',
+    primary_image: recipe.primary_image ?? '',
+    keywords: recipe.keywords ?? '',
+    category: recipe.category ?? '',
+    cuisine: recipe.cuisine ?? '',
+    url: recipe.url ?? '',
+    is_favorite: !!recipe.is_favorite,
+    ingredients: ingredients.map((row) => row.label),
+    steps: steps.map((s) => ({
+      ...s,
+      text: s.text ?? '',
+      section: s.section ?? undefined,
+    })),
   };
 };
 
 export const insertRecipe = async (recipe: IngestRecipe, uuid?: string) => {
-  const client = await getClient();
-  let recipeId: number;
-
-  try {
-    await client.query('BEGIN');
+  const result = await db.transaction().execute(async (trx) => {
+    let recipeId: string; // Kysely returns string for Int8
 
     if (uuid) {
-      const recipeResult = await client.query(
-        'INSERT INTO recipe (name, description, url, primary_image, cuisine, category, keywords, uuid) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id',
-        [
-          recipe.name,
-          recipe.description,
-          recipe.url,
-          recipe.heroImage,
-          recipe.cuisine,
-          recipe.category,
-          recipe.keywords,
+      const inserted = await trx
+        .insertInto('recipe')
+        .values({
+          name: recipe.name,
+          description: recipe.description,
+          url: recipe.url,
+          primary_image: recipe.heroImage,
+          cuisine: recipe.cuisine,
+          category: recipe.category,
+          keywords: recipe.keywords,
           uuid,
-        ],
-      );
-
-      recipeId = recipeResult.rows[0].id;
+        })
+        .returning('id')
+        .executeTakeFirstOrThrow();
+      recipeId = inserted.id;
     } else {
-      const recipeResult = await client.query(
-        'INSERT INTO recipe (name, description, url, primary_image, cuisine, category, keywords) VALUES ($1, $2, $3, $4, $5, $6, $7 ) RETURNING id',
-        [
-          recipe.name,
-          recipe.description,
-          recipe.url,
-          recipe.heroImage,
-          recipe.cuisine,
-          recipe.category,
-          recipe.keywords,
-        ],
-      );
-      recipeId = recipeResult.rows[0].id;
+      const inserted = await trx
+        .insertInto('recipe')
+        .values({
+          name: recipe.name,
+          description: recipe.description,
+          url: recipe.url,
+          primary_image: recipe.heroImage,
+          cuisine: recipe.cuisine,
+          category: recipe.category,
+          keywords: recipe.keywords,
+        })
+        .returning('id')
+        .executeTakeFirstOrThrow();
+      recipeId = inserted.id;
     }
 
-    const ingredientsInsert = recipe.ingredients.map((ingredient, index) => {
-      return client.query(
-        'INSERT INTO ingredient (recipe_id, label, sort) VALUES ($1, $2, $3)',
-        [recipeId, ingredient, index],
-      );
-    });
+    if (recipe.ingredients.length > 0) {
+      await trx
+        .insertInto('ingredient')
+        .values(
+          recipe.ingredients.map((ingredient, index) => ({
+            recipe_id: Number(recipeId),
+            label: ingredient,
+            sort: index,
+          })),
+        )
+        .execute();
+    }
 
-    const instructionsInsert = recipe.steps
+    const stepsToInsert = recipe.steps
       .filter((instruction) => instruction.label || instruction.text)
-      .map((instruction, index) => {
-        return client.query(
-          'INSERT INTO steps (recipe_id, label, text, sort, section) VALUES ($1, $2, $3, $4, $5)',
-          [
-            recipeId,
-            instruction.label ? instruction.label : instruction.text,
-            instruction.text ?? '',
-            index,
-            instruction.section,
-          ],
-        );
-      });
+      .map((instruction, index) => ({
+        recipe_id: Number(recipeId),
+        label: instruction.label ?? instruction.text ?? '',
+        text: instruction.text ?? '',
+        sort: index,
+        section: instruction.section,
+      }));
 
-    await Promise.all([...ingredientsInsert, ...instructionsInsert]);
-    await client.query('COMMIT');
-  } catch (e) {
-    await client.query('ROLLBACK');
+    if (stepsToInsert.length > 0) {
+      await trx.insertInto('steps').values(stepsToInsert).execute();
+    }
 
-    throw new Error('Error inserting recipe');
-  }
+    return recipeId;
+  });
 
-  return getRecipeById(recipeId);
+  return getRecipeById(Number(result));
 };
 
 export const deleteRecipe = async (id: number) => {
-  const client = await getClient();
-
-  await client.query('DELETE FROM recipe WHERE id = $1', [id]);
+  await db
+    .deleteFrom('recipe')
+    .where('id', '=', id.toString())
+    .execute();
 };
 
 export const insertIntoFailedIngest = async (url: string) => {
-  const client = await getClient();
-
-  await client.query('INSERT INTO failed_ingest (url) VALUES ($1)', [url]);
+  await db.insertInto('failed_ingest').values({ url }).execute();
 };
 
 export const editRecipe = async (recipe: FullRecipe, id: number) => {
-  const client = await getClient();
-
-  try {
-    await client.query('BEGIN');
-    await client.query(
-      'UPDATE recipe SET name = $1, description = $2, url = $3, primary_image = $4, cuisine = $5, category = $6, keywords = $7 WHERE id = $8',
-      [
-        recipe.name,
-        recipe.description,
-        recipe.url,
-        recipe.primary_image,
-        recipe.cuisine,
-        recipe.category,
-        recipe.keywords,
-        id,
-      ],
-    );
+  await db.transaction().execute(async (trx) => {
+    await trx
+      .updateTable('recipe')
+      .set({
+        name: recipe.name,
+        description: recipe.description,
+        url: recipe.url,
+        primary_image: recipe.primary_image,
+        cuisine: recipe.cuisine,
+        category: recipe.category,
+        keywords: recipe.keywords,
+      })
+      .where('id', '=', id.toString())
+      .execute();
 
     if (recipe.ingredients.length) {
-      await client.query('DELETE FROM ingredient WHERE recipe_id = $1', [id]);
+      await trx
+        .deleteFrom('ingredient')
+        .where('recipe_id', '=', id)
+        .execute();
 
-      const ingredientsInsert = recipe.ingredients.map((ingredient, index) => {
-        return client.query(
-          'INSERT INTO ingredient (recipe_id, label, sort) VALUES ($1, $2, $3)',
-          [id, ingredient, index],
-        );
-      });
-      await Promise.all(ingredientsInsert);
+      await trx
+        .insertInto('ingredient')
+        .values(
+          recipe.ingredients.map((ingredient, index) => ({
+            recipe_id: id,
+            label: ingredient,
+            sort: index,
+          })),
+        )
+        .execute();
     }
 
     if (recipe.steps.length) {
-      await client.query('DELETE FROM steps WHERE recipe_id = $1', [id]);
-      const stepsInsert = recipe.steps.map((step, index) => {
-        return client.query(
-          'INSERT INTO steps (recipe_id, label, text, sort, section) VALUES ($1, $2, $3, $4, $5)',
-          [id, step.label, step.text, index, step.section],
-        );
-      });
+      await trx.deleteFrom('steps').where('recipe_id', '=', id).execute();
 
-      await Promise.all(stepsInsert);
+      const stepsInsert = recipe.steps.map((step, index) => ({
+        recipe_id: id,
+        label: step.label,
+        text: step.text,
+        sort: index,
+        section: step.section,
+      }));
+
+      await trx.insertInto('steps').values(stepsInsert).execute();
     }
-  } catch (e) {
-    await client.query('ROLLBACK');
-
-    throw new Error('Error updating recipe');
-  } finally {
-    await client.query('COMMIT');
-  }
+  });
 };
