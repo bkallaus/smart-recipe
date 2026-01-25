@@ -1,6 +1,6 @@
 "use client";
-import { ingestRecipe } from "@/app/query";
-import { deleteRecipe, insertIntoFailedIngest } from "@/server-actions/recipes";
+import { ingestRecipe } from "@/server-actions/ingest";
+import { insertIntoFailedIngest } from "@/server-actions/recipes";
 import type { FullRecipe } from "@/types/recipe";
 import { Button } from "./ui/button";
 import { useState } from "react";
@@ -14,15 +14,14 @@ const ReIngestButton = ({ recipe }: { recipe: FullRecipe }) => {
   const rescanRecipe = async () => {
     try {
       setLoading(true);
-      const newUrl = await ingestRecipe(recipe.url, recipe.uuid);
-      await deleteRecipe(recipe.id);
+      const recipeUuid = await ingestRecipe(recipe.url, recipe.uuid);
 
       toast({
         title: "Recipe Updated",
         description: "Recipe has been rescanned and updated",
       });
 
-      window.location.href = `/recipe/${newUrl}`;
+      window.location.href = `/recipe/${recipeUuid}`;
     } catch (error) {
       toast({
         title: "Update Failed",

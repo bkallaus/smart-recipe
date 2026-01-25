@@ -1,5 +1,5 @@
 "use client";
-import { ingestRecipe } from "@/app/query";
+import { ingestRecipe } from "@/server-actions/ingest";
 import { useRouter } from "next/navigation";
 import { useToast } from "./ui/use-toast";
 import { Button } from "./ui/button";
