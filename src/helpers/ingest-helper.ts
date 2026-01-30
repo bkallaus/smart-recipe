@@ -142,9 +142,13 @@ export const convertJsonLdToIngest = async (
 };
 
 export const smartIngest = async (
-  jsonLd: any,
+  data: any,
 ): Promise<IngestRecipe | null> => {
-  const prompt: string = `Convert the following jsonld recipe data into a structured JSON format. 
+  const isString = typeof data === 'string';
+  const content = isString ? data : JSON.stringify(data);
+  const contextType = isString ? 'HTML website content' : 'jsonld recipe data';
+
+  const prompt: string = `Convert the following ${contextType} into a structured JSON format.
 
 ### Instructions:
 1.  **Metadata Extraction**: 
@@ -159,8 +163,8 @@ export const smartIngest = async (
 4.  **Taxonomy**:
     - Provide a concise \`category\` (e.g., "Dessert"), \`cuisine\` (e.g., "Italian"), and \`keywords\` (comma-separated).
 
-### JSONLD Data:
-${JSON.stringify(jsonLd)}`;
+### Data:
+${content}`;
 
   try {
     const result: string = await askAI(prompt);
