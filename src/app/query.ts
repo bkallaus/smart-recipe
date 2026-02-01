@@ -43,6 +43,10 @@ export const ingestRecipe = async (url: string, uuid?: string) => {
 
     const result = await insertRecipe(mappedRecipe, uuid);
 
+    if (!result) {
+        throw new Error('Failed to insert recipe');
+    }
+
     await toggleFavoriteRecipe(result.uuid);
 
     return result.uuid;
@@ -73,6 +77,10 @@ export const smartIngestRecipe = async (url: string, uuid?: string) => {
     }
 
     const result = await insertRecipe(mappedRecipe, uuid);
+
+    if (!result) {
+        throw new Error('Failed to insert recipe');
+    }
 
     await toggleFavoriteRecipe(result.uuid);
 
