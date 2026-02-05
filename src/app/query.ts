@@ -16,22 +16,31 @@ export const getJson = async (url: string) => {
 };
 
 export const ingestRecipe = async (url: string, uuid?: string) => {
+    const response = await fetch(url, {
+        headers: {
+            'User-Agent':
+                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36',
+        },
+    });
+    const html = await response.text();
+
     const options = {
-        url,
+        html,
+        url: response.url,
     };
 
     const results = await ogs(options);
 
-    if (results.error) {
-        throw new Error('Could not ingest recipe');
-    }
-
     const json = results.result.jsonLD;
 
-    const mappedRecipe = await convertJsonLdToIngest(json, url);
+    let mappedRecipe = await convertJsonLdToIngest(json, url);
 
     if (!mappedRecipe) {
-        throw new Error('Could not convert jsonLD to ingest recipe');
+        mappedRecipe = await smartIngest(html);
+    }
+
+    if (!mappedRecipe) {
+        throw new Error('Could not ingest recipe');
     }
 
     if (mappedRecipe.heroImage) {
@@ -53,17 +62,15 @@ export const ingestRecipe = async (url: string, uuid?: string) => {
 };
 
 export const smartIngestRecipe = async (url: string, uuid?: string) => {
-    const options = {
-        url,
-    };
+    const response = await fetch(url, {
+        headers: {
+            'User-Agent':
+                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36',
+        },
+    });
+    const html = await response.text();
 
-    const results = await ogs(options);
-
-    if (results.error) {
-        throw new Error('Could not ingest recipe');
-    }
-
-    const mappedRecipe = await smartIngest(results);
+    const mappedRecipe = await smartIngest(html);
 
     if (!mappedRecipe) {
         throw new Error('Could not parse recipe');

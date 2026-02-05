@@ -2,7 +2,12 @@ import RecipeRow from "@/components/recipe-row";
 import { getAllFavoriteRecipes } from "@/server-actions/favorite-recipes";
 
 const FavoritePage = async () => {
-  const favoriteRecipes = await getAllFavoriteRecipes();
+  let favoriteRecipes: Awaited<ReturnType<typeof getAllFavoriteRecipes>> = [];
+  try {
+    favoriteRecipes = await getAllFavoriteRecipes();
+  } catch (error) {
+    console.warn("Failed to fetch favorite recipes:", error);
+  }
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
