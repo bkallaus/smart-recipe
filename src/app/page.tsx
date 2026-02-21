@@ -4,6 +4,8 @@ import { getFavoriteRecipes } from "@/server-actions/favorite-recipes";
 import { getRecentRecipes } from "@/server-actions/recipes";
 import Link from "next/link";
 
+export const dynamic = 'force-dynamic';
+
 const Home = async () => {
   const recentRecipes = await getRecentRecipes(6);
   const favoriteRecipes = await getFavoriteRecipes(6);

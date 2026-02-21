@@ -57,13 +57,23 @@ export const getAllFavoriteRecipes = async (): Promise<RecipeCard[]> => {
     .selectFrom('recipe as r')
     .innerJoin('user_recipe as ur', 'r.id', 'ur.recipe_id')
     .innerJoin('users as u', 'ur.user_id', 'u.id')
-    .select(['r.uuid', 'r.name', 'r.description'])
+    .select([
+      'r.uuid',
+      'r.name',
+      'r.description',
+      'r.category',
+      'r.cuisine',
+      'r.keywords',
+    ])
     .where('u.email', '=', user.email)
     .execute();
 
   return recipes.map((r) => ({
     ...r,
     description: r.description ?? '',
+    category: r.category ?? '',
+    cuisine: r.cuisine ?? '',
+    keywords: r.keywords ?? '',
   }));
 };
 
@@ -80,7 +90,14 @@ export const getFavoriteRecipes = async (
     .selectFrom('recipe as r')
     .innerJoin('user_recipe as ur', 'r.id', 'ur.recipe_id')
     .innerJoin('users as u', 'ur.user_id', 'u.id')
-    .select(['r.uuid', 'r.name', 'r.description'])
+    .select([
+      'r.uuid',
+      'r.name',
+      'r.description',
+      'r.category',
+      'r.cuisine',
+      'r.keywords',
+    ])
     .where('u.email', '=', user.email)
     .orderBy('r.id', 'desc')
     .limit(limit ?? 9)
@@ -89,5 +106,8 @@ export const getFavoriteRecipes = async (
   return recipes.map((r) => ({
     ...r,
     description: r.description ?? '',
+    category: r.category ?? '',
+    cuisine: r.cuisine ?? '',
+    keywords: r.keywords ?? '',
   }));
 };

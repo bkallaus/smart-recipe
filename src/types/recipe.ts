@@ -27,4 +27,7 @@ export type RecipeCard = {
   uuid: string;
   name: string;
   description: string;
+  category: string;
+  cuisine: string;
+  keywords: string;
 };
