@@ -7,7 +7,7 @@ import { getUser } from './verify-credentials';
 export const getRecentRecipes = async (limit = 15): Promise<RecipeCard[]> => {
   const recipes = await db
     .selectFrom('recipe')
-    .select(['uuid', 'name', 'description'])
+    .select(['uuid', 'name', 'description', 'category', 'cuisine', 'keywords'])
     .orderBy('id', 'desc')
     .limit(limit)
     .execute();
@@ -15,6 +15,9 @@ export const getRecentRecipes = async (limit = 15): Promise<RecipeCard[]> => {
   return recipes.map((r) => ({
     ...r,
     description: r.description ?? '',
+    category: r.category ?? '',
+    cuisine: r.cuisine ?? '',
+    keywords: r.keywords ?? '',
   }));
 };
 
@@ -29,7 +32,7 @@ export const getRecipeById = async (id: number) => {
 export const searchRecipes = async (search: string): Promise<RecipeCard[]> => {
   const recipes = await db
     .selectFrom('recipe')
-    .select(['uuid', 'name', 'description'])
+    .select(['uuid', 'name', 'description', 'category', 'cuisine', 'keywords'])
     .where('name', 'ilike', `%${search}%`)
     .limit(30)
     .execute();
@@ -37,6 +40,9 @@ export const searchRecipes = async (search: string): Promise<RecipeCard[]> => {
   return recipes.map((r) => ({
     ...r,
     description: r.description ?? '',
+    category: r.category ?? '',
+    cuisine: r.cuisine ?? '',
+    keywords: r.keywords ?? '',
   }));
 };
 
@@ -179,10 +185,7 @@ export const insertRecipe = async (recipe: IngestRecipe, uuid?: string) => {
 };
 
 export const deleteRecipe = async (id: number) => {
-  await db
-    .deleteFrom('recipe')
-    .where('id', '=', id.toString())
-    .execute();
+  await db.deleteFrom('recipe').where('id', '=', id.toString()).execute();
 };
 
 export const insertIntoFailedIngest = async (url: string) => {
@@ -206,10 +209,7 @@ export const editRecipe = async (recipe: FullRecipe, id: number) => {
       .execute();
 
     if (recipe.ingredients.length) {
-      await trx
-        .deleteFrom('ingredient')
-        .where('recipe_id', '=', id)
-        .execute();
+      await trx.deleteFrom('ingredient').where('recipe_id', '=', id).execute();
 
       await trx
         .insertInto('ingredient')
