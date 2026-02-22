@@ -1,74 +1,74 @@
 'use server';
 import { OAuth2Client } from 'google-auth-library';
-import { cookies } from 'next/headers';
 import { jwtDecode } from 'jwt-decode';
+import { cookies } from 'next/headers';
 import type { User } from '@/types/user';
 
 const client = new OAuth2Client();
 
 const getToken = async () => {
-    const cookie = await cookies();
+  const cookie = await cookies();
 
-    const recipeToken = cookie.get('recipe-token');
+  const recipeToken = cookie.get('recipe-token');
 
-    return recipeToken;
+  return recipeToken;
 };
 
 // When should I verify?
 const verifyCookies = async (): Promise<string | null> => {
-    const recipeToken = await getToken();
+  const recipeToken = await getToken();
 
-    if (!recipeToken?.value) {
-        return null;
-    }
+  if (!recipeToken?.value) {
+    return null;
+  }
 
-    const ticket = await client.verifyIdToken({
-        idToken: recipeToken.value,
-        audience:
-            '283295300739-5stqmhh5f1b3k50scpqe747cfb2lo85r.apps.googleusercontent.com',
-    });
+  const ticket = await client.verifyIdToken({
+    idToken: recipeToken.value,
+    audience:
+      '283295300739-5stqmhh5f1b3k50scpqe747cfb2lo85r.apps.googleusercontent.com',
+  });
 
-    const payload = ticket.getPayload();
+  const payload = ticket.getPayload();
 
-    if (!payload?.email) {
-        return null;
-    }
+  if (!payload?.email) {
+    return null;
+  }
 
-    return payload.email;
+  return payload.email;
 };
 
 export const getEmail = async () => {
-    const recipeToken = await getToken();
+  const recipeToken = await getToken();
 
-    if (!recipeToken?.value) {
-        return null;
-    }
+  if (!recipeToken?.value) {
+    return null;
+  }
 
-    const decoded = jwtDecode(recipeToken?.value) as { name: string };
+  const decoded = jwtDecode(recipeToken?.value) as { name: string };
 
-    return decoded.name;
+  return decoded.name;
 };
 
 export const getUser = async (): Promise<User | null> => {
-    const recipeToken = await getToken();
+  const recipeToken = await getToken();
 
-    if (!recipeToken?.value) {
-        return null;
-    }
+  if (!recipeToken?.value) {
+    return null;
+  }
 
-    const decoded = jwtDecode(recipeToken?.value) as {
-        email: string;
-        name: string;
-    };
+  const decoded = jwtDecode(recipeToken?.value) as {
+    email: string;
+    name: string;
+  };
 
-    return {
-        email: decoded.email,
-        name: decoded.name,
-    };
+  return {
+    email: decoded.email,
+    name: decoded.name,
+  };
 };
 
 export const hasAccess = async () => {
-    const recipeToken = await getToken();
+  const recipeToken = await getToken();
 
-    return !!recipeToken?.value;
+  return !!recipeToken?.value;
 };

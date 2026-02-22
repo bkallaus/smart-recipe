@@ -1,4 +1,8 @@
-import { GoogleGenerativeAI, SchemaType, type Schema } from '@google/generative-ai';
+import {
+  GoogleGenerativeAI,
+  type Schema,
+  SchemaType,
+} from '@google/generative-ai';
 import 'server-only';
 
 const genAI = new GoogleGenerativeAI(process.env.API_KEY as string);
