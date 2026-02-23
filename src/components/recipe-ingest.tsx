@@ -1,12 +1,12 @@
-"use client";
-import { ingestRecipe } from "@/app/query";
-import { useRouter } from "next/navigation";
-import { useToast } from "./ui/use-toast";
-import { Button } from "./ui/button";
-import { useState } from "react";
-import { Loader2, Sparkles } from "lucide-react";
-import { insertIntoFailedIngest } from "@/server-actions/recipes";
-import { Input } from "./ui/input";
+'use client';
+import { Loader2, Sparkles } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { ingestRecipe } from '@/app/query';
+import { insertIntoFailedIngest } from '@/server-actions/recipes';
+import { Button } from './ui/button';
+import { Input } from './ui/input';
+import { useToast } from './ui/use-toast';
 
 const useRecipeIngest = () => {
   const { toast } = useToast();
@@ -16,9 +16,9 @@ const useRecipeIngest = () => {
     try {
       setLoading(true);
 
-      if (!url?.includes("https://")) {
+      if (!url?.includes('https://')) {
         toast({
-          title: "Invalid URL",
+          title: 'Invalid URL',
           description: `${url} is not valid. Please copy a valid URL`,
         });
 
@@ -28,20 +28,20 @@ const useRecipeIngest = () => {
       const recipeId = await ingestRecipe(url);
 
       toast({
-        title: "Ingested Recipe",
+        title: 'Ingested Recipe',
         description: `We've ingested the recipe for you, navigating now`,
       });
 
       router.push(`/recipe/${recipeId}`);
     } catch (error) {
-      console.error("failed to ingest:", error);
+      console.error('failed to ingest:', error);
       if (url) {
         await insertIntoFailedIngest(url);
       }
       toast({
-        title: "Error Ingesting Recipe",
+        title: 'Error Ingesting Recipe',
         description:
-          "Your URL may be invalid or the recipe could not be ingested, Please copy a valid url.",
+          'Your URL may be invalid or the recipe could not be ingested, Please copy a valid url.',
       });
     } finally {
       setLoading(false);
@@ -56,24 +56,29 @@ const useRecipeIngest = () => {
 
 const RecipeIngest = () => {
   const { onMagicIngest, loading } = useRecipeIngest();
-  const [url, setUrl] = useState("");
+  const [url, setUrl] = useState('');
 
   return (
-    <div className="flex gap-3">
+    <form
+      className='flex gap-3'
+      onSubmit={(e) => {
+        e.preventDefault();
+        onMagicIngest(url);
+      }}
+    >
       <Input
-        placeholder="Enter recipe URL"
+        type='url'
+        required
+        aria-label='Recipe URL'
+        placeholder='Enter recipe URL'
         onChange={(e) => setUrl(e.target.value)}
         value={url}
       />
-      <Button
-        type="button"
-        disabled={loading}
-        onClick={() => onMagicIngest(url)}
-      >
-        {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-        <Sparkles className="mr-1" /> Smart Ingest Recipe
+      <Button type='submit' disabled={loading} aria-busy={loading}>
+        {loading && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
+        <Sparkles className='mr-1' /> Smart Ingest Recipe
       </Button>
-    </div>
+    </form>
   );
 };
 
