@@ -3,11 +3,11 @@ import { Pool } from 'pg';
 import type { DB } from '@/types/db';
 
 const dialect = new PostgresDialect({
-    pool: new Pool({
-        connectionString: process.env.DATABASE_URL,
-    }),
+  pool: new Pool({
+    connectionString: process.env.DATABASE_URL,
+  }),
 });
 
 export const db = new Kysely<DB>({
-    dialect,
+  dialect,
 });

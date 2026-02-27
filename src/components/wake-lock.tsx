@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useWakeLock } from "react-screen-wake-lock";
-import { Button } from "./ui/button";
+import { useWakeLock } from 'react-screen-wake-lock';
+import { Button } from './ui/button';
 
 export const WakeLockButton = () => {
   const { isSupported, released, request, release } = useWakeLock();
@@ -12,10 +12,10 @@ export const WakeLockButton = () => {
 
   return (
     <Button
-      variant={released ? "outline" : undefined}
+      variant={released ? 'outline' : undefined}
       onClick={() => (released === false ? release() : request())}
     >
-      {released === false ? "Allow Lock Screen" : "Keep Screen On"}
+      {released === false ? 'Allow Lock Screen' : 'Keep Screen On'}
     </Button>
   );
 };
