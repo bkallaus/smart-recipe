@@ -1,6 +1,6 @@
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { forwardRef } from "react";
+import { forwardRef } from 'react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 export const InputWithLabel = forwardRef(
   (
@@ -8,13 +8,13 @@ export const InputWithLabel = forwardRef(
       label?: string;
       id?: string;
     } & React.InputHTMLAttributes<HTMLInputElement>,
-    ref: React.Ref<HTMLInputElement>
+    ref: React.Ref<HTMLInputElement>,
   ) => {
     return (
-      <div className="grid w-full max-w-md items-center gap-1.5">
+      <div className='grid w-full max-w-md items-center gap-1.5'>
         {props.label && <Label htmlFor={props.id}>{props.label}</Label>}
         <Input id={props.id} ref={ref} {...props} />
       </div>
     );
-  }
+  },
 );

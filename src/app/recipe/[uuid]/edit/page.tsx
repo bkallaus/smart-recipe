@@ -1,6 +1,6 @@
-import { getFullRecipeById } from "@/server-actions/recipes";
-import { notFound } from "next/navigation";
-import RecipeForm from "./recipe-form";
+import { notFound } from 'next/navigation';
+import { getFullRecipeById } from '@/server-actions/recipes';
+import RecipeForm from './recipe-form';
 
 const EditRecipePage = async ({
   params,

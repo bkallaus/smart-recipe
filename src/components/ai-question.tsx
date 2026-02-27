@@ -1,10 +1,10 @@
-"use client";
-import { callGemini } from "@/server-actions/gemini-proxy";
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
+'use client';
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { callGemini } from '@/server-actions/gemini-proxy';
 
 export const AskAIQuestion = () => {
-  const [question, setQuestion] = useState("");
+  const [question, setQuestion] = useState('');
 
   const askAI = async (question: string) => {
     const response = await callGemini(question);

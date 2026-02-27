@@ -1,6 +1,6 @@
 'use client';
 import { X } from 'lucide-react';
-import { useEffect, useState, useTransition } from 'react';
+import { useEffect, useRef, useState, useTransition } from 'react';
 import { useDebounce } from 'use-debounce';
 import { searchRecipes } from '@/server-actions/recipes';
 import type { RecipeCard } from '@/types/recipe';
@@ -11,6 +11,7 @@ const SearchRecipes = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [recentRecipes, setRecentRecipes] = useState<RecipeCard[]>([]);
   const [isPending, startTransition] = useTransition();
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const [value] = useDebounce(searchTerm, 1000);
 
@@ -26,6 +27,12 @@ const SearchRecipes = () => {
     });
   }, [value]);
 
+  const handleClear = () => {
+    setSearchTerm('');
+    setRecentRecipes([]);
+    inputRef.current?.focus();
+  };
+
   return (
     <div>
       <section className='w-full py-12 md:py-24 lg:py-32 bg-gradient-to-r from-blue-50 to-indigo-50'>
@@ -38,22 +45,25 @@ const SearchRecipes = () => {
             </div>
             <div className='flex flex-col w-full relative'>
               <input
+                ref={inputRef}
                 type='text'
                 aria-label='Search recipes'
                 placeholder='Search for recipes'
                 className='form-search rounded-lg w-full p-4 pr-24'
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Escape') {
+                    handleClear();
+                  }
+                }}
               />
               {searchTerm && (
                 <Button
                   variant='ghost'
                   size='icon'
                   className='absolute right-4 top-1/2 -translate-y-1/2 hover:bg-transparent'
-                  onClick={() => {
-                    setSearchTerm('');
-                    setRecentRecipes([]);
-                  }}
+                  onClick={handleClear}
                   aria-label='Clear search'
                 >
                   <X className='h-4 w-4' />

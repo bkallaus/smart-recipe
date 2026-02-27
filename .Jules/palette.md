@@ -1,0 +1,1 @@
+## 2026-02-27 - [Focus Management in Search]\n**Learning:** Users clearing a search input often intend to type a new query immediately.\n**Action:** Ensure focus returns to the input field after clearing, and support Escape key to clear.

@@ -1,8 +1,8 @@
-"use client";
-import { Button } from "@/components/ui/button";
-import { toggleFavoriteRecipe } from "@/server-actions/favorite-recipes";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+'use client';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { toggleFavoriteRecipe } from '@/server-actions/favorite-recipes';
 
 const FavoriteButton = ({
   uuid,
@@ -22,8 +22,8 @@ const FavoriteButton = ({
   };
 
   return (
-    <Button disabled={isLoading} variant={"outline"} onClick={onToggle}>
-      {isFavorite ? "Remove from Favorites" : "Add to Favorites"}
+    <Button disabled={isLoading} variant={'outline'} onClick={onToggle}>
+      {isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
     </Button>
   );
 };

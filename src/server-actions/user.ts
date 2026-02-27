@@ -3,22 +3,22 @@ import { db } from '@/lib/db';
 import { getUser } from './verify-credentials';
 
 export const upsertUser = async () => {
-    const user = await getUser();
+  const user = await getUser();
 
-    if (!user?.email) {
-        return;
-    }
+  if (!user?.email) {
+    return;
+  }
 
-    await db
-        .insertInto('users')
-        .values({
-            email: user.email,
-            name: user.name,
-        })
-        .onConflict((oc) =>
-            oc.column('email').doUpdateSet({
-                name: user.name,
-            }),
-        )
-        .execute();
+  await db
+    .insertInto('users')
+    .values({
+      email: user.email,
+      name: user.name,
+    })
+    .onConflict((oc) =>
+      oc.column('email').doUpdateSet({
+        name: user.name,
+      }),
+    )
+    .execute();
 };
