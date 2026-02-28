@@ -1,6 +1,6 @@
 'use client';
 import { X } from 'lucide-react';
-import { useEffect, useState, useTransition } from 'react';
+import { useEffect, useRef, useState, useTransition } from 'react';
 import { useDebounce } from 'use-debounce';
 import { searchRecipes } from '@/server-actions/recipes';
 import type { RecipeCard } from '@/types/recipe';
@@ -11,6 +11,7 @@ const SearchRecipes = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [recentRecipes, setRecentRecipes] = useState<RecipeCard[]>([]);
   const [isPending, startTransition] = useTransition();
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const [value] = useDebounce(searchTerm, 1000);
 
@@ -38,12 +39,19 @@ const SearchRecipes = () => {
             </div>
             <div className='flex flex-col w-full relative'>
               <input
+                ref={inputRef}
                 type='text'
                 aria-label='Search recipes'
                 placeholder='Search for recipes'
                 className='form-search rounded-lg w-full p-4 pr-24'
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Escape') {
+                    setSearchTerm('');
+                    setRecentRecipes([]);
+                  }
+                }}
               />
               {searchTerm && (
                 <Button
@@ -53,6 +61,7 @@ const SearchRecipes = () => {
                   onClick={() => {
                     setSearchTerm('');
                     setRecentRecipes([]);
+                    inputRef.current?.focus();
                   }}
                   aria-label='Clear search'
                 >
