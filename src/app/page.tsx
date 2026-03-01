@@ -5,8 +5,20 @@ import { getRecentRecipes } from "@/server-actions/recipes";
 import Link from "next/link";
 
 const Home = async () => {
-  const recentRecipes = await getRecentRecipes(6);
-  const favoriteRecipes = await getFavoriteRecipes(6);
+  let recentRecipes: Awaited<ReturnType<typeof getRecentRecipes>> = [];
+  let favoriteRecipes: Awaited<ReturnType<typeof getFavoriteRecipes>> = [];
+
+  try {
+    recentRecipes = await getRecentRecipes(6);
+  } catch (error) {
+    console.warn("Failed to fetch recent recipes in page:", error);
+  }
+
+  try {
+    favoriteRecipes = await getFavoriteRecipes(6);
+  } catch (error) {
+    console.warn("Failed to fetch favorite recipes in page:", error);
+  }
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-between">

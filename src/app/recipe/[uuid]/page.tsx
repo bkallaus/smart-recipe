@@ -19,7 +19,12 @@ const IndividualRecipe = async ({
   }>;
 }) => {
   const { uuid } = await params;
-  const recipe = await getFullRecipeById(uuid);
+  let recipe: Awaited<ReturnType<typeof getFullRecipeById>> = null;
+  try {
+    recipe = await getFullRecipeById(uuid);
+  } catch (error) {
+    console.warn("Failed to fetch recipe:", error);
+  }
 
   if (!recipe) {
     notFound();
