@@ -1,5 +1,5 @@
 'use client';
-import { X } from 'lucide-react';
+import { Search, X } from 'lucide-react';
 import { useEffect, useRef, useState, useTransition } from 'react';
 import { useDebounce } from 'use-debounce';
 import { searchRecipes } from '@/server-actions/recipes';
@@ -38,12 +38,15 @@ const SearchRecipes = () => {
               </h1>
             </div>
             <div className='flex flex-col w-full relative'>
+              <div className='absolute left-4 top-1/2 -translate-y-1/2 text-gray-400'>
+                <Search className='h-5 w-5' />
+              </div>
               <input
                 ref={inputRef}
                 type='text'
                 aria-label='Search recipes'
                 placeholder='Search for recipes'
-                className='form-search rounded-lg w-full p-4 pr-24'
+                className='form-search rounded-lg w-full p-4 pl-12 pr-24'
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 onKeyDown={(e) => {
@@ -77,16 +80,24 @@ const SearchRecipes = () => {
           </div>
         </div>
       </section>
-      <div className='p-12 md:p-24 text-center'>
-        {isPending ? (
-          <div className='flex justify-center items-center'>
-            <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900' />
-            <span className='ml-2 text-lg'>Searching...</span>
-          </div>
-        ) : (
-          <RecipeRow recipes={recentRecipes} />
-        )}
-      </div>
+      {(isPending || searchTerm || recentRecipes.length > 0) && (
+        <div className='p-12 md:p-24 text-center'>
+          {isPending ? (
+            <div className='flex justify-center items-center'>
+              <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900' />
+              <span className='ml-2 text-lg'>Searching...</span>
+            </div>
+          ) : recentRecipes.length > 0 ? (
+            <RecipeRow recipes={recentRecipes} />
+          ) : searchTerm ? (
+            <div className='flex flex-col items-center justify-center text-gray-500 py-8'>
+              <Search className='h-12 w-12 mb-4 text-gray-300' />
+              <p className='text-xl font-medium'>No recipes found</p>
+              <p className='text-sm mt-2'>We couldn't find any recipes matching "{searchTerm}"</p>
+            </div>
+          ) : null}
+        </div>
+      )}
     </div>
   );
 };
