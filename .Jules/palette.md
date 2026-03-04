@@ -5,3 +5,7 @@
 ## 2024-03-03 - Search Results Empty State UX
 **Learning:** When search returns no results, a completely blank container or page without feedback creates confusion and a dead-end experience.
 **Action:** Always implement a helpful empty state displaying a clear message ("No results found") and possibly repeating the search term to provide continuous context and feedback.
+
+## 2024-05-15 - Async Action Loading Feedback
+**Learning:** Adding a small visual indicator (like a loading spinner) combined with an `aria-busy` attribute significantly improves user understanding of background processes and increases accessibility for screen readers.
+**Action:** Always add a loading icon and the `aria-busy={isLoading}` attribute to buttons that trigger asynchronous server actions.
