@@ -37,7 +37,7 @@ const SmartReIngestButton = ({ recipe }: { recipe: FullRecipe }) => {
   };
 
   return (
-    <Button disabled={loading} onClick={rescanRecipe}>
+    <Button disabled={loading} aria-busy={loading} onClick={rescanRecipe}>
       {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin " />}{" "}
       <Sparkles className="mr-1" /> Smart Rescan
     </Button>
