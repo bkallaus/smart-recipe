@@ -9,3 +9,7 @@
 ## 2024-05-15 - Async Action Loading Feedback
 **Learning:** Adding a small visual indicator (like a loading spinner) combined with an `aria-busy` attribute significantly improves user understanding of background processes and increases accessibility for screen readers.
 **Action:** Always add a loading icon and the `aria-busy={isLoading}` attribute to buttons that trigger asynchronous server actions.
+
+## 2024-06-20 - Null/Zero Rendering in React
+**Learning:** Using `array.length &&` for conditional rendering in React can accidentally render the number "0" to the screen if the array is empty, creating a poor user experience.
+**Action:** Always use strict comparison for conditional array rendering, such as `array.length > 0 &&`, to prevent rendering falsy number values.
