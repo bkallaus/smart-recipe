@@ -14,7 +14,7 @@ const Home = async () => {
         <SearchRecipes />
         <div className="p-12 md:p-24  text-center">
           <div className="h-5" />
-          {recentRecipes.length && (
+          {recentRecipes.length > 0 && (
             <>
               <Link href="/favorite">
                 <h2 className="text-2xl font-semibold mt-8 hover:underline">
