@@ -66,7 +66,12 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const recentRecipes = await getRecentRecipes(3);
+  let recentRecipes: any[] = [];
+  try {
+    recentRecipes = await getRecentRecipes(3);
+  } catch (e) {
+    console.warn("Failed to get recent recipes for layout", e);
+  }
 
   if (!(await hasAccess())) {
     return (
