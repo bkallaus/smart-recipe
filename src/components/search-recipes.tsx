@@ -45,7 +45,7 @@ const SearchRecipes = () => {
                 ref={inputRef}
                 type='text'
                 aria-label='Search recipes'
-                placeholder='Search for recipes'
+                placeholder='Search for recipes or ingredients'
                 className='form-search rounded-lg w-full p-4 pl-12 pr-24'
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -93,7 +93,10 @@ const SearchRecipes = () => {
             <div className='flex flex-col items-center justify-center text-gray-500 py-8'>
               <Search className='h-12 w-12 mb-4 text-gray-300' />
               <p className='text-xl font-medium'>No recipes found</p>
-              <p className='text-sm mt-2'>We couldn't find any recipes matching "{searchTerm}"</p>
+              <p className='text-sm mt-2'>
+                We couldn't find any recipes or ingredients matching "
+                {searchTerm}"
+              </p>
             </div>
           ) : null}
         </div>
