@@ -30,7 +30,18 @@ export const searchRecipes = async (search: string): Promise<RecipeCard[]> => {
   const recipes = await db
     .selectFrom('recipe')
     .select(['uuid', 'name', 'description'])
-    .where('name', 'ilike', `%${search}%`)
+    .where((eb) =>
+      eb.or([
+        eb('name', 'ilike', `%${search}%`),
+        eb.exists(
+          eb
+            .selectFrom('ingredient')
+            .select('ingredient.id')
+            .whereRef('ingredient.recipe_id', '=', 'recipe.id')
+            .where('ingredient.label', 'ilike', `%${search}%`),
+        ),
+      ]),
+    )
     .limit(30)
     .execute();
 
@@ -179,10 +190,7 @@ export const insertRecipe = async (recipe: IngestRecipe, uuid?: string) => {
 };
 
 export const deleteRecipe = async (id: number) => {
-  await db
-    .deleteFrom('recipe')
-    .where('id', '=', id.toString())
-    .execute();
+  await db.deleteFrom('recipe').where('id', '=', id.toString()).execute();
 };
 
 export const insertIntoFailedIngest = async (url: string) => {
@@ -206,10 +214,7 @@ export const editRecipe = async (recipe: FullRecipe, id: number) => {
       .execute();
 
     if (recipe.ingredients.length) {
-      await trx
-        .deleteFrom('ingredient')
-        .where('recipe_id', '=', id)
-        .execute();
+      await trx.deleteFrom('ingredient').where('recipe_id', '=', id).execute();
 
       await trx
         .insertInto('ingredient')
