@@ -23,7 +23,7 @@ const ReIngestButton = ({ recipe }: { recipe: FullRecipe }) => {
       });
 
       window.location.href = `/recipe/${newUrl}`;
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: "Update Failed",
         description: "Recipe has failed to update",
@@ -35,7 +35,7 @@ const ReIngestButton = ({ recipe }: { recipe: FullRecipe }) => {
   };
 
   return (
-    <Button disabled={loading} onClick={rescanRecipe}>
+    <Button disabled={loading} aria-busy={loading} onClick={rescanRecipe}>
       {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Manual
       Rescan
     </Button>
