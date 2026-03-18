@@ -9,3 +9,6 @@
 ## 2024-05-15 - Async Action Loading Feedback
 **Learning:** Adding a small visual indicator (like a loading spinner) combined with an `aria-busy` attribute significantly improves user understanding of background processes and increases accessibility for screen readers.
 **Action:** Always add a loading icon and the `aria-busy={isLoading}` attribute to buttons that trigger asynchronous server actions.
+## 2024-05-20 - Interactive Card Elements UX
+**Learning:** Large clickable areas, such as recipe cards, lack clear interactive cues without explicit visual feedback, making keyboard navigation and general interaction less accessible.
+**Action:** Always implement explicit visual feedback for interactive card elements, including hover states (e.g., `hover:shadow-lg hover:-translate-y-1`) and clear keyboard focus outlines (e.g., `focus-visible:ring-2`) to ensure accessibility and better UX.
