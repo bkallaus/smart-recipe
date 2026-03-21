@@ -9,3 +9,6 @@
 ## 2024-05-15 - Async Action Loading Feedback
 **Learning:** Adding a small visual indicator (like a loading spinner) combined with an `aria-busy` attribute significantly improves user understanding of background processes and increases accessibility for screen readers.
 **Action:** Always add a loading icon and the `aria-busy={isLoading}` attribute to buttons that trigger asynchronous server actions.
+## 2024-05-16 - Custom Input Wrapper Accessibility
+**Learning:** Custom input wrapper components (e.g., `InputWithLabel`) often fail to link the `<Label htmlFor={...}>` to the `<Input id={...}>` when used with form libraries like `react-hook-form` that do not automatically inject an `id` prop. This completely breaks accessibility for screen readers and prevents users from clicking the label to focus the input.
+**Action:** Always implement an ID fallback system inside custom input wrappers (e.g., `const inputId = props.id || props.name || useId()`) to guarantee that labels and inputs are always securely linked, regardless of how they are instantiated by form libraries.
