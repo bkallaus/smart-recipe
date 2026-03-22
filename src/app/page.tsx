@@ -9,26 +9,49 @@ const Home = async () => {
   const favoriteRecipes = await getFavoriteRecipes(6);
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between">
-      <div>
-        <SearchRecipes />
-        <div className="p-12 md:p-24  text-center">
-          <div className="h-5" />
-          {recentRecipes.length && (
-            <>
-              <Link href="/favorite">
-                <h2 className="text-2xl font-semibold mt-8 hover:underline">
+    <main className="flex min-h-screen flex-col bg-[hsl(var(--surface))]">
+      <SearchRecipes />
+
+      {/* Favorites Section */}
+      {favoriteRecipes.length > 0 && (
+        <section className="bg-[hsl(var(--surface-container-low))] py-14 md:py-20">
+          <div className="px-8 md:px-12 lg:pl-16 lg:pr-8">
+            <div className="mb-10">
+              <Link href="/favorite" className="group inline-block">
+                <h2
+                  className="text-2xl md:text-3xl font-semibold text-[hsl(var(--primary))] group-hover:opacity-80 transition-opacity duration-200"
+                  style={{ fontFamily: "'Noto Serif', Georgia, serif" }}
+                >
                   Favorite Recipes
                 </h2>
+                <div className="h-0.5 w-0 group-hover:w-full bg-[hsl(var(--primary)/0.4)] transition-all duration-300 mt-1 rounded-full" />
               </Link>
-              <RecipeRow recipes={favoriteRecipes} />
-            </>
-          )}
-          <div className="h-8" />
-          <h2 className="text-2xl font-semibold mt-8">Recent Recipes</h2>
+              <p className="text-[hsl(var(--on-surface-variant))] mt-2 text-sm">
+                Your curated collection
+              </p>
+            </div>
+            <RecipeRow recipes={favoriteRecipes} />
+          </div>
+        </section>
+      )}
+
+      {/* Recent Recipes Section */}
+      <section className="bg-[hsl(var(--surface))] py-14 md:py-20">
+        <div className="px-8 md:px-12 lg:pl-16 lg:pr-8">
+          <div className="mb-10">
+            <h2
+              className="text-2xl md:text-3xl font-semibold text-[hsl(var(--on-surface))]"
+              style={{ fontFamily: "'Noto Serif', Georgia, serif" }}
+            >
+              Recent Recipes
+            </h2>
+            <p className="text-[hsl(var(--on-surface-variant))] mt-2 text-sm">
+              Freshly added to your kitchen
+            </p>
+          </div>
           <RecipeRow recipes={recentRecipes} />
         </div>
-      </div>
+      </section>
     </main>
   );
 };

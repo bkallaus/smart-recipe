@@ -1,4 +1,3 @@
-import { Inter } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import Header from "@/components/header";
@@ -8,8 +7,6 @@ import type { Metadata, Viewport } from "next";
 import { getRecentRecipes } from "@/server-actions/recipes";
 import RecipeRow from "@/components/recipe-row";
 import { Analytics } from "@vercel/analytics/react";
-
-const inter = Inter({ subsets: ["latin"] });
 
 const APP_NAME = "Smart Recipe";
 const APP_DEFAULT_TITLE = "Smart Recipe";
@@ -58,7 +55,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#FFFFFF",
+  themeColor: "#fff8f3",
 };
 
 export default async function RootLayout({
@@ -72,44 +69,48 @@ export default async function RootLayout({
     return (
       <html lang="en">
         <head />
-        <body className={inter.className}>
+        <body className="bg-[hsl(var(--surface))] text-[hsl(var(--on-surface))]">
           <Header />
-          <div className="m-auto border border-rose-400 bg-rose-100 text-lg text-center mt-4">
-            To view recipes and ingest new ones please login
+
+          {/* Login notice */}
+          <div className="mx-8 md:mx-16 mt-6 px-5 py-4 bg-[hsl(var(--primary-container)/0.3)] rounded-xl text-[hsl(var(--on-surface))] text-sm">
+            To view recipes and add new ones, please sign in.
           </div>
+
           <main className="flex-1">
-            <section className="w-full py-12 md:py-24 lg:py-32 bg-gradient-to-r from-blue-50 to-indigo-50">
-              <div className="container px-4 md:px-6">
-                <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 items-center">
-                  <div className="flex flex-col justify-center space-y-4">
-                    <div className="space-y-2">
-                      <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none">
-                        Import Any Recipe with AI
-                      </h1>
-                      <p className="max-w-[600px] text-gray-500 md:text-xl">
-                        Instantly import and organize recipes from anywhere with
-                        our AI-powered platform.
-                      </p>
-                    </div>
-                  </div>
-                </div>
+            {/* Hero */}
+            <section className="w-full py-16 md:py-28 lg:py-36 gradient-hero relative overflow-hidden">
+              <div className="absolute inset-0 opacity-10 bg-[radial-gradient(ellipse_at_top_right,_hsl(var(--surface-container-lowest))_0%,_transparent_60%)]" />
+              <div className="px-8 md:px-12 lg:pl-16 lg:pr-8 relative z-10">
+                <h1
+                  className="text-4xl font-bold tracking-tight sm:text-5xl xl:text-6xl text-[hsl(var(--on-primary))] leading-tight"
+                  style={{ fontFamily: "'Noto Serif', Georgia, serif" }}
+                >
+                  Import Any Recipe
+                  <br />
+                  <span className="italic font-normal opacity-90">with AI</span>
+                </h1>
+                <p className="mt-4 text-[hsl(var(--on-primary)/0.75)] text-lg max-w-sm">
+                  Instantly import and organize recipes from anywhere.
+                </p>
               </div>
             </section>
 
-            {/* Recipe Examples Section */}
-            <section className="w-full py-12 md:py-16 lg:py-20">
-              <div className="container px-4 md:px-6">
-                <div className="mx-auto max-w-[800px] space-y-4 text-center">
-                  <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl">
+            {/* Recent Recipes */}
+            <section className="bg-[hsl(var(--surface-container-low))] py-14 md:py-20">
+              <div className="px-8 md:px-12 lg:pl-16 lg:pr-8">
+                <div className="mb-10">
+                  <h2
+                    className="text-2xl md:text-3xl font-semibold text-[hsl(var(--on-surface))]"
+                    style={{ fontFamily: "'Noto Serif', Georgia, serif" }}
+                  >
                     Recent Recipes
                   </h2>
-                  <p className="mx-auto max-w-[600px] text-gray-500 md:text-xl">
-                    Discover recipes imported and enhanced by our AI technology.
+                  <p className="text-[hsl(var(--on-surface-variant))] mt-2 text-sm">
+                    Discover recipes imported and enhanced by AI.
                   </p>
                 </div>
-                <div className="pt-8 md:pt-12">
-                  <RecipeRow recipes={recentRecipes} />
-                </div>
+                <RecipeRow recipes={recentRecipes} />
               </div>
             </section>
           </main>
@@ -121,7 +122,7 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className="bg-[hsl(var(--surface))] text-[hsl(var(--on-surface))]">
         <Header />
         {children}
         <Toaster />
