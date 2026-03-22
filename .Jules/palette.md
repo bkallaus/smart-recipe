@@ -9,3 +9,6 @@
 ## 2024-05-15 - Async Action Loading Feedback
 **Learning:** Adding a small visual indicator (like a loading spinner) combined with an `aria-busy` attribute significantly improves user understanding of background processes and increases accessibility for screen readers.
 **Action:** Always add a loading icon and the `aria-busy={isLoading}` attribute to buttons that trigger asynchronous server actions.
+## 2026-03-22 - Immediate Search Feedback
+**Learning:** Clearing a debounced search input causes stale results to linger awkwardly until the debounce timer completes, confusing users.
+**Action:** When a search input is cleared, instantly bypass the debounce by hiding results if the raw local state is empty (e.g., `searchTerm && ...`).
