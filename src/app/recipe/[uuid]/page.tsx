@@ -26,24 +26,25 @@ const IndividualRecipe = async ({
   }
 
   return (
-    <main className="min-h-screen bg-[hsl(var(--surface))] px-6 md:px-12 lg:pl-16 lg:pr-8 py-10 lg:py-16">
-      <div className="max-w-3xl">
+    <main className="min-h-screen bg-[hsl(var(--surface))] px-6 md:px-12 lg:pl-32 lg:pr-12 py-10 lg:py-24">
+      <div className="max-w-4xl space-y-16">
         {/* Hero image */}
         {recipe.primary_image?.includes("supabase") && (
-          <img
-            src={recipe.primary_image}
-            width={600}
-            height={400}
-            alt={""}
-            className="w-full max-h-72 object-cover rounded-xl mb-8"
-            style={{ boxShadow: "0 12px 32px hsl(var(--on-surface) / 0.08)" }}
-          />
+          <div className="relative group">
+            <img
+              src={recipe.primary_image}
+              width={800}
+              height={500}
+              alt={recipe.name}
+              className="w-full max-h-[500px] object-cover rounded-2xl shadow-ambient"
+            />
+          </div>
         )}
 
         {/* Title row */}
-        <div className="flex flex-col md:flex-row gap-4 justify-between items-start mb-6">
+        <div className="space-y-6">
           <h1
-            className="text-3xl md:text-4xl font-bold text-[hsl(var(--on-surface))] leading-snug"
+            className="text-5xl md:text-6xl lg:text-7xl font-bold text-[hsl(var(--on-surface))] leading-[1.1]"
             style={{
               fontFamily: "'Noto Serif', Georgia, serif",
               viewTransitionName: `recipe-title-${recipe.uuid}`,
@@ -51,73 +52,83 @@ const IndividualRecipe = async ({
           >
             {titleCase(recipe.name)}
           </h1>
-          <div className="flex gap-2 shrink-0">
+          
+          <div className="flex flex-wrap gap-4 items-center">
             <FavoriteButton uuid={recipe.uuid} isFavorite={recipe.is_favorite} />
-            <Button asChild variant={"outline"} className="rounded-full text-sm">
-              <a href={recipe.url}>Original Recipe</a>
+            <Button asChild variant="secondary" className="rounded-full bg-[hsl(var(--surface-container-highest))] border-0 text-[hsl(var(--on-surface))] hover:bg-[hsl(var(--surface-container-high))]">
+              <a href={recipe.url} target="_blank" rel="noopener noreferrer">Original Recipe</a>
             </Button>
             <WakeLockButton />
           </div>
-        </div>
 
-        {/* Badges */}
-        <div className="flex gap-2 mb-4">
-          {recipe.cuisine && (
-            <Badge className="bg-[hsl(var(--secondary-container))] text-[hsl(var(--on-secondary-container))] border-0 rounded-full">
-              {recipe.cuisine}
-            </Badge>
-          )}
-          {recipe.category && (
-            <Badge className="bg-[hsl(var(--tertiary-container))] text-[hsl(var(--on-tertiary))] border-0 rounded-full">
-              {recipe.category}
-            </Badge>
-          )}
+          {/* Badges */}
+          <div className="flex flex-wrap gap-3 mt-4">
+            {recipe.cuisine && (
+              <Badge className="bg-[hsl(var(--primary-container))] text-[hsl(var(--on-primary-container))] border-0 rounded-full px-4 py-1.5 text-sm font-medium">
+                {recipe.cuisine}
+              </Badge>
+            )}
+            {recipe.category && (
+              <Badge className="bg-[hsl(var(--secondary-container))] text-[hsl(var(--on-secondary-container))] border-0 rounded-full px-4 py-1.5 text-sm font-medium">
+                {recipe.category}
+              </Badge>
+            )}
+          </div>
         </div>
 
         {/* Description */}
-        <p className="text-[hsl(var(--on-surface-variant))] leading-relaxed mb-8 text-base">
-          {recipe.description}
-        </p>
+        <div className="max-w-2xl">
+          <p className="text-xl md:text-2xl text-[hsl(var(--on-surface-variant))] leading-relaxed italic">
+            {recipe.description}
+          </p>
+        </div>
 
         {/* Ingredients */}
-        <div className="mb-6">
+        <section>
           <Paper>
             <h2
-              className="text-lg font-semibold text-[hsl(var(--primary))] mb-4"
+              className="text-2xl md:text-3xl font-bold text-[hsl(var(--primary))] mb-8"
               style={{ fontFamily: "'Noto Serif', Georgia, serif" }}
             >
               Ingredients
             </h2>
-            {recipe.ingredients.map((ingredient, index) => (
-              <Fragment key={`ingredient-${index}`}>
-                <div className="text-sm text-[hsl(var(--on-surface))]">{ingredient}</div>
-                <div className="h-3" />
-              </Fragment>
-            ))}
+            <div className="space-y-6">
+              {recipe.ingredients.map((ingredient, index) => (
+                <div key={`ingredient-${index}`} className="flex items-start gap-4 text-lg text-[hsl(var(--on-surface))]">
+                  <span className="shrink-0 w-2 h-2 mt-2.5 rounded-full bg-[hsl(var(--secondary))] opacity-60" />
+                  <span>{ingredient}</span>
+                </div>
+              ))}
+            </div>
           </Paper>
-        </div>
+        </section>
 
         {/* Instructions */}
-        <Paper>
-          <h2
-            className="text-lg font-semibold text-[hsl(var(--primary))] mb-4"
-            style={{ fontFamily: "'Noto Serif', Georgia, serif" }}
-          >
-            Instructions
-          </h2>
-          <StepsOrSections steps={recipe.steps} />
-        </Paper>
+        <section>
+          <Paper>
+            <h2
+              className="text-2xl md:text-3xl font-bold text-[hsl(var(--primary))] mb-8"
+              style={{ fontFamily: "'Noto Serif', Georgia, serif" }}
+            >
+              Instructions
+            </h2>
+            <StepsOrSections steps={recipe.steps} />
+          </Paper>
+        </section>
 
         {/* Footer actions */}
-        <div className="mt-10 pt-8 border-t border-[hsl(var(--outline-variant)/0.2)]">
-          <p className="text-sm text-[hsl(var(--on-surface-variant))] mb-4">
-            Missing information?
-          </p>
-          <div className="flex gap-3">
-            <RecipeIngestButton recipe={recipe} />
-            <SmartReIngestButton recipe={recipe} />
+        <footer className="pt-16 mt-24 border-t border-[hsl(var(--outline-variant)/0.2)]">
+          <div className="bg-[hsl(var(--surface-container-low))] p-8 rounded-2xl flex flex-col md:flex-row justify-between items-center gap-6">
+            <div className="space-y-1 text-center md:text-left">
+              <h3 className="text-xl font-semibold">Missing information?</h3>
+              <p className="text-[hsl(var(--on-surface-variant))]">You can re-ingest the recipe to get more details.</p>
+            </div>
+            <div className="flex gap-4">
+              <RecipeIngestButton recipe={recipe} />
+              <SmartReIngestButton recipe={recipe} />
+            </div>
           </div>
-        </div>
+        </footer>
       </div>
     </main>
   );
