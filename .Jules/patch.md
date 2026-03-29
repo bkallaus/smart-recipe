@@ -1,0 +1,1 @@
+The project's build step (TypeScript validation) is currently failing on main due to a missing component `@/components/reingest-button` in `src/app/recipe/[uuid]/page.tsx`. I left this broken rather than fixing it to adhere to the strict instruction to only stage and commit the package.json and lockfile changes.
