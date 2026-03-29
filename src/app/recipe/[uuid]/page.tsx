@@ -52,7 +52,7 @@ const IndividualRecipe = async ({
           >
             {titleCase(recipe.name)}
           </h1>
-          
+
           <div className="flex flex-wrap gap-4 items-center">
             <FavoriteButton uuid={recipe.uuid} isFavorite={recipe.is_favorite} />
             <Button asChild variant="secondary" className="rounded-full bg-[hsl(var(--surface-container-highest))] border-0 text-[hsl(var(--on-surface))] hover:bg-[hsl(var(--surface-container-high))]">
@@ -124,7 +124,6 @@ const IndividualRecipe = async ({
               <p className="text-[hsl(var(--on-surface-variant))]">You can re-ingest the recipe to get more details.</p>
             </div>
             <div className="flex gap-4">
-              <RecipeIngestButton recipe={recipe} />
               <SmartReIngestButton recipe={recipe} />
             </div>
           </div>

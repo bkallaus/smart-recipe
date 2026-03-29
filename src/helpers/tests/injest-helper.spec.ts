@@ -39,28 +39,28 @@ describe('Injest Helper', () => {
       const recipe = findRecipeIngredients(BaseJson);
       expect(recipe).not.toBeNull();
 
-      expect(recipe.recipeIngredient).toBeDefined();
+      expect(recipe!.recipeIngredient).toBeDefined();
     });
 
     test('should return the correct value JSONArray', () => {
       const recipe = findRecipeIngredients(JSONArray);
       expect(recipe).not.toBeNull();
 
-      expect(recipe.recipeIngredient).toBeDefined();
+      expect(recipe!.recipeIngredient).toBeDefined();
     });
 
     test('should return the correct value JSONObject', () => {
       const recipe = findRecipeIngredients(JSONObject);
 
       expect(recipe).not.toBeNull();
-      expect(recipe.recipeIngredient).toBeDefined();
+      expect(recipe!.recipeIngredient).toBeDefined();
     });
 
     test('should return the correct value JSONGraphInArray', () => {
       const recipe = findRecipeIngredients(JSONGraphInArray);
 
       expect(recipe).not.toBeNull();
-      expect(recipe.recipeIngredient).toBeDefined();
+      expect(recipe!.recipeIngredient).toBeDefined();
     });
   });
 });

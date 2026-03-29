@@ -39,8 +39,14 @@ const recipeSchema = {
 };
 
 export const askAI = async (prompt: string) => {
+  const withSchemaPrompt = `
+  ${prompt}
+  ### JSON Response Schema:
+  ${JSON.stringify(recipeSchema, null, 2)}
+`;
+
   const response = await client.chat.completions.create({
-    model: 'google/gemma-3n-e4b-it:free',
+    model: 'google/gemma-3-12b-it:free',
     response_format: {
       type: 'json_schema',
       json_schema: {
@@ -49,13 +55,8 @@ export const askAI = async (prompt: string) => {
         schema: recipeSchema,
       },
     },
-    // Only route to providers that support structured outputs
-    // @ts-expect-error — OpenRouter-specific extension
-    provider: {
-      require_parameters: true,
-    },
     messages: [
-      { role: 'user', content: prompt },
+      { role: 'user', content: withSchemaPrompt },
     ],
   });
 
