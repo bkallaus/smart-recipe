@@ -31,7 +31,7 @@
 		"lucide-react": "^0.412.0",
 		"nanoid": "^5.1.6",
 		"next": "^16.1.1",
-		"open-graph-scraper": "^6.6.2",
+		"open-graph-scraper": "^6.11.0",
 		"openai": "^6.33.0",
 		"pg": "^8.17.1",
 		"react": "^19.2.3",
