@@ -1,68 +1,113 @@
 @import "tailwindcss";
 @config "../../tailwind.config.ts";
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,600&family=Manrope:wght@300;400;500;600;700&display=swap');
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-    --radius: 0.5rem;
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
-  }
+    /* ── The Editorial Kitchen Design System ── */
 
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
+    /* Surface Hierarchy */
+    --surface: 30 60% 97.4%;               /* #fff8f3 — The Table */
+    --surface-container-low: 28 44% 95.3%; /* #faf2ec — The Plate */
+    --surface-container: 27 36% 93%;       /* #f5ede5 */
+    --surface-container-high: 25 28% 89%;  /* #ede3d9 */
+    --surface-container-highest: 24 22% 85%; /* #e3d8ce */
+    --surface-container-lowest: 0 0% 100%; /* #ffffff — The Garnish */
+
+    /* On-surface text */
+    --on-surface: 30 20% 23%;             /* #36322c */
+    --on-surface-variant: 28 14% 44%;     /* #736660 */
+
+    /* Primary — Garden Sage */
+    --primary: 100 22% 36%;              /* #4a6140 */
+    --primary-container: 100 28% 85%;    /* #d0e6c8 */
+    --on-primary: 0 0% 100%;
+    --on-primary-container: 100 32% 12%;
+
+    /* Secondary — Saffron/Terracotta */
+    --secondary: 13 75% 38%;             /* #a83a19 */
+    --secondary-container: 15 100% 80%;  /* #ffad96 */
+    --on-secondary: 0 0% 100%;
+    --on-secondary-container: 13 75% 15%;
+
+    /* Tertiary */
+    --tertiary: 36 70% 40%;
+    --tertiary-container: 36 80% 88%;
+    --on-tertiary: 0 0% 100%;
+
+    /* Outline */
+    --outline: 27 10% 60%;               /* #a09489 */
+    --outline-variant: 27 12% 70%;       /* #b8b1a9 */
+
+    /* Shad-cn compatibility mappings */
+    --background: var(--surface);
+    --foreground: var(--on-surface);
+    --card: var(--surface-container-lowest);
+    --card-foreground: var(--on-surface);
+    --popover: var(--surface-container-lowest);
+    --popover-foreground: var(--on-surface);
+    --primary-foreground: var(--on-primary);
+    --secondary-foreground: var(--on-secondary);
+    --muted: var(--surface-container-high);
+    --muted-foreground: var(--on-surface-variant);
+    --accent: var(--surface-container);
+    --accent-foreground: var(--on-surface);
+    --border: var(--outline-variant);
+    --input: var(--surface-container-highest);
+    --ring: var(--primary);
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --radius: 0.75rem;
   }
 }
 
 @layer base {
   * {
-    @apply border-border;
+    /* "No-Line" rule: remove default borders */
+    @apply border-border/20;
   }
+
   body {
-    @apply bg-background text-foreground;
+    font-family: 'Manrope', system-ui, sans-serif;
+    background-color: hsl(var(--surface));
+    color: hsl(var(--on-surface));
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Noto Serif', Georgia, serif;
+  }
+}
+
+/* Glass & Gradient utilities */
+@layer utilities {
+  .glass-nav {
+    background-color: hsl(var(--surface) / 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  .gradient-primary {
+    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary-container)) 100%);
+  }
+
+  .gradient-hero {
+    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary-container)) 100%);
+  }
+
+  .shadow-ambient {
+    box-shadow: 0 12px 32px hsl(var(--on-surface) / 0.06);
+  }
+
+  .shadow-ambient-md {
+    box-shadow: 0 8px 20px hsl(var(--on-surface) / 0.08);
+  }
+
+  .ghost-border-bottom {
+    border-bottom: 1px solid hsl(var(--outline-variant) / 0.2);
+  }
+
+  .ghost-border-bottom:focus {
+    border-bottom-color: hsl(var(--primary));
   }
 }

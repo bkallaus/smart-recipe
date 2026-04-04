@@ -4,8 +4,6 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { ingestRecipe } from '@/app/query';
 import { insertIntoFailedIngest } from '@/server-actions/recipes';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
 import { useToast } from './ui/use-toast';
 
 const useRecipeIngest = () => {
@@ -66,18 +64,24 @@ const RecipeIngest = () => {
         onMagicIngest(url);
       }}
     >
-      <Input
+      <input
         type='url'
         required
         aria-label='Recipe URL'
         placeholder='Enter recipe URL'
         onChange={(e) => setUrl(e.target.value)}
         value={url}
+        className="flex-1 min-w-0 px-4 py-2 rounded-xl bg-[hsl(var(--surface-container-highest))] text-[hsl(var(--on-surface))] placeholder-[hsl(var(--on-surface-variant))] outline-none border-0 border-b-2 border-[hsl(var(--outline-variant)/0.3)] focus:border-[hsl(var(--primary))] transition-colors duration-200 text-sm"
       />
-      <Button type='submit' disabled={loading} aria-busy={loading}>
-        {loading && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
-        <Sparkles className='mr-1' /> Smart Ingest Recipe
-      </Button>
+      <button
+        type='submit'
+        disabled={loading}
+        aria-busy={loading}
+        className="flex items-center gap-2 px-5 py-2 gradient-primary text-white text-sm font-medium rounded-full shadow-ambient transition-opacity duration-200 hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+      >
+        {loading && <Loader2 className='h-4 w-4 animate-spin' />}
+        <Sparkles className='h-4 w-4' /> Smart Ingest
+      </button>
     </form>
   );
 };

@@ -1,81 +1,64 @@
-import { GoogleGenerativeAI, SchemaType, type Schema } from '@google/generative-ai';
+import OpenAI from 'openai';
 import 'server-only';
 
-const genAI = new GoogleGenerativeAI(process.env.API_KEY as string);
+const client = new OpenAI({
+  baseURL: 'https://openrouter.ai/api/v1',
+  apiKey: process.env.OPENROUTER_API_KEY as string,
+});
 
-const RecipeJsonSchema: Schema = {
-  description: 'Recipe format',
-  type: SchemaType.OBJECT,
+const recipeSchema = {
+  type: 'object',
   properties: {
-    category: {
-      type: SchemaType.STRING,
-    },
-    cuisine: {
-      type: SchemaType.STRING,
-    },
-    keywords: {
-      type: SchemaType.STRING,
-    },
-    name: {
-      type: SchemaType.STRING,
-    },
-    description: {
-      type: SchemaType.STRING,
-    },
-    heroImage: {
-      type: SchemaType.STRING,
-    },
+    category: { type: 'string' },
+    cuisine: { type: 'string' },
+    keywords: { type: 'string' },
+    name: { type: 'string' },
+    description: { type: 'string' },
+    heroImage: { type: 'string' },
     ingredients: {
-      type: SchemaType.ARRAY,
-      items: {
-        type: SchemaType.STRING,
-      },
+      type: 'array',
+      items: { type: 'string' },
     },
     steps: {
-      type: SchemaType.ARRAY,
+      type: 'array',
       items: {
-        type: SchemaType.OBJECT,
+        type: 'object',
         properties: {
-          label: {
-            type: SchemaType.STRING,
-          },
-          text: {
-            type: SchemaType.STRING,
-          },
-          section: {
-            type: SchemaType.STRING,
-          },
+          label: { type: 'string' },
+          text: { type: 'string' },
+          section: { type: 'string' },
         },
         required: ['label'],
+        additionalProperties: false,
       },
     },
-    url: {
-      type: SchemaType.STRING,
-    },
+    url: { type: 'string' },
   },
-  required: [
-    'category',
-    'cuisine',
-    'keywords',
-    'name',
-    'description',
-    'heroImage',
-    'ingredients',
-    'steps',
-    'url',
-  ],
+  required: ['category', 'cuisine', 'keywords', 'name', 'description', 'heroImage', 'ingredients', 'steps', 'url'],
+  additionalProperties: false,
 };
 
 export const askAI = async (prompt: string) => {
-  const model = genAI.getGenerativeModel({
-    model: 'gemini-2.5-flash',
-    generationConfig: {
-      responseMimeType: 'application/json',
-      responseSchema: RecipeJsonSchema,
+  const withSchemaPrompt = `
+  ${prompt}
+  ### JSON Response Schema:
+  ${JSON.stringify(recipeSchema, null, 2)}
+`;
+
+  const response = await client.chat.completions.create({
+    model: 'google/gemma-3-12b-it:free',
+    response_format: {
+      type: 'json_schema',
+      json_schema: {
+        name: 'recipe',
+        strict: true,
+        schema: recipeSchema,
+      },
     },
+    messages: [
+      { role: 'user', content: withSchemaPrompt },
+    ],
   });
 
-  const result = await model.generateContent([prompt]);
-
-  return result.response.text();
+  return response.choices[0].message.content ?? '';
 };

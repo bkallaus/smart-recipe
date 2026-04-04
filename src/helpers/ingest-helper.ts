@@ -144,6 +144,7 @@ export const convertJsonLdToIngest = async (
 export const smartIngest = async (
   jsonLd: any,
 ): Promise<IngestRecipe | null> => {
+
   const prompt: string = `Convert the following jsonld recipe data into a structured JSON format. 
 
 ### Instructions:
@@ -165,7 +166,9 @@ ${JSON.stringify(jsonLd)}`;
   try {
     const result: string = await askAI(prompt);
 
-    const parsed = JSON.parse(result);
+    // Strip markdown code fences if the model wraps its response (common for free models)
+    const cleaned = result.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '').trim();
+    const parsed = JSON.parse(cleaned);
 
     return parsed;
   } catch (error) {

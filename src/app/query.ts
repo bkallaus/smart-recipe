@@ -5,16 +5,6 @@ import { convertJsonLdToIngest, smartIngest } from '../helpers/ingest-helper';
 import { toggleFavoriteRecipe } from '@/server-actions/favorite-recipes';
 import { downloadUploadImage } from '@/server-actions/image-service';
 
-export const getJson = async (url: string) => {
-    const options = {
-        url,
-    };
-
-    const results = await ogs(options);
-
-    return results.result.jsonLD;
-};
-
 export const ingestRecipe = async (url: string, uuid?: string) => {
     const options = {
         url,
@@ -52,7 +42,7 @@ export const ingestRecipe = async (url: string, uuid?: string) => {
     return result.uuid;
 };
 
-export const smartIngestRecipe = async (url: string, uuid?: string) => {
+export const smartIngestRecipe = async (url: string) => {
     const options = {
         url,
     };
@@ -63,7 +53,7 @@ export const smartIngestRecipe = async (url: string, uuid?: string) => {
         throw new Error('Could not ingest recipe');
     }
 
-    const mappedRecipe = await smartIngest(results);
+    const mappedRecipe = await smartIngest(results.result.jsonLD);
 
     if (!mappedRecipe) {
         throw new Error('Could not parse recipe');
@@ -76,7 +66,7 @@ export const smartIngestRecipe = async (url: string, uuid?: string) => {
         }
     }
 
-    const result = await insertRecipe(mappedRecipe, uuid);
+    const result = await insertRecipe(mappedRecipe);
 
     if (!result) {
         throw new Error('Failed to insert recipe');

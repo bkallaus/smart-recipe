@@ -205,12 +205,13 @@ export const editRecipe = async (recipe: FullRecipe, id: number) => {
       .where('id', '=', id.toString())
       .execute();
 
-    if (recipe.ingredients.length) {
-      await trx
-        .deleteFrom('ingredient')
-        .where('recipe_id', '=', id)
-        .execute();
+    // Handle ingredients: always delete existing ones for this recipe
+    await trx
+      .deleteFrom('ingredient')
+      .where('recipe_id', '=', id)
+      .execute();
 
+    if (recipe.ingredients.length) {
       await trx
         .insertInto('ingredient')
         .values(
@@ -223,9 +224,10 @@ export const editRecipe = async (recipe: FullRecipe, id: number) => {
         .execute();
     }
 
-    if (recipe.steps.length) {
-      await trx.deleteFrom('steps').where('recipe_id', '=', id).execute();
+    // Handle steps: always delete existing ones for this recipe
+    await trx.deleteFrom('steps').where('recipe_id', '=', id).execute();
 
+    if (recipe.steps.length) {
       const stepsInsert = recipe.steps.map((step, index) => ({
         recipe_id: id,
         label: step.label,
