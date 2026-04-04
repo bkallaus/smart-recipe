@@ -1,4 +1,4 @@
-import RecipeIngestButton from "@/components/reingest-button";
+import RecipeIngestButton from "@/components/recipe-ingest";
 import SmartReIngestButton from "@/components/smart-reingest-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
