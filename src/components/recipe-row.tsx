@@ -7,8 +7,13 @@ const RecipeRow = ({ recipes }: { recipes: RecipeCard[] }) => {
     <div className="grid md:grid-cols-3 gap-4 lg:gap-10">
       {recipes.map((recipe) => (
         // @ts-expect-error viewTransition is supported in next 15+ but types might be missing
-        <Link key={`recipe-${recipe.uuid}`} href={`/recipe/${recipe.uuid}`} viewTransition>
-          <div className="bg-white p-4 rounded-md shadow-md h-full">
+        <Link
+          key={`recipe-${recipe.uuid}`}
+          href={`/recipe/${recipe.uuid}`}
+          viewTransition
+          className="group block rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+        >
+          <div className="bg-white p-4 rounded-md shadow-md h-full transition-all duration-200 group-hover:-translate-y-1 group-hover:shadow-lg">
             {/* <img
               src={recipe.heroImage}
               alt={recipe.name}
