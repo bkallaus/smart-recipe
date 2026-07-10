@@ -9,6 +9,7 @@ import { Paper } from "@/components/paper";
 import { Fragment } from "react";
 import FavoriteButton from "./favorite-button";
 import { WakeLockButton } from "@/components/wake-lock";
+import CookingModeTimer from "@/components/cooking-mode-timer";
 
 const IndividualRecipe = async ({
   params,
@@ -128,6 +129,7 @@ const IndividualRecipe = async ({
           </div>
         </footer>
       </div>
+      <CookingModeTimer />
     </main>
   );
 };
