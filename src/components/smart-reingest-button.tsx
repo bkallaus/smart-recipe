@@ -1,7 +1,8 @@
 "use client";
-import { smartIngestRecipe } from "@/app/query";
+import { fetchRecipeJsonLd, saveSmartIngestedRecipe } from "@/app/query";
 import { deleteRecipe, insertIntoFailedIngest } from "@/server-actions/recipes";
 import type { FullRecipe } from "@/types/recipe";
+import { buildSmartIngestPrompt } from "@/helpers/ingest-helper";
 import { Button } from "./ui/button";
 import { useState } from "react";
 import { useToast } from "./ui/use-toast";
@@ -16,17 +17,27 @@ const SmartReIngestButton = ({ recipe }: { recipe: FullRecipe }) => {
       setLoading(true);
       console.log("Rescanning recipe", recipe);
 
-      const newUrl = await smartIngestRecipe(recipe.url);
+      const jsonLd = await fetchRecipeJsonLd(recipe.url);
+      const prompt = buildSmartIngestPrompt(jsonLd);
+
+      const session = await window.ai.languageModel.create();
+      const aiResponse = await session.prompt(prompt);
+
+      const cleaned = aiResponse.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '').trim();
+      const parsedRecipe = JSON.parse(cleaned);
+
+      const newUrl = await saveSmartIngestedRecipe(parsedRecipe);
 
       await deleteRecipe(recipe.id);
 
       toast({
         title: "Recipe Updated",
-        description: "Recipe has been rescanned and updated",
+        description: "Recipe has been rescanned and updated using built-in AI",
       });
 
       window.location.href = `/recipe/${newUrl}`;
     } catch (error) {
+      console.error(error);
       toast({
         title: "Update Failed",
         description: "Recipe has failed to update",

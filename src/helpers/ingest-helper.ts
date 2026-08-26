@@ -1,4 +1,3 @@
-import { askAI } from '@/server-actions/gemini';
 import type { IngestRecipe, Instruction } from '@/types/ingest';
 
 type IngestInstruction = {
@@ -141,11 +140,8 @@ export const convertJsonLdToIngest = async (
   return mappedRecipe;
 };
 
-export const smartIngest = async (
-  jsonLd: any,
-): Promise<IngestRecipe | null> => {
-
-  const prompt: string = `Convert the following jsonld recipe data into a structured JSON format. 
+export const buildSmartIngestPrompt = (jsonLd: any): string => {
+  return `Convert the following jsonld recipe data into a structured JSON format.
 
 ### Instructions:
 1.  **Metadata Extraction**: 
@@ -160,19 +156,39 @@ export const smartIngest = async (
 4.  **Taxonomy**:
     - Provide a concise \`category\` (e.g., "Dessert"), \`cuisine\` (e.g., "Italian"), and \`keywords\` (comma-separated).
     
+### JSON Response Schema:
+{
+  "type": "object",
+  "properties": {
+    "category": { "type": "string" },
+    "cuisine": { "type": "string" },
+    "keywords": { "type": "string" },
+    "name": { "type": "string" },
+    "description": { "type": "string" },
+    "heroImage": { "type": "string" },
+    "ingredients": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "steps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "label": { "type": "string" },
+          "text": { "type": "string" },
+          "section": { "type": "string" }
+        },
+        "required": ["label"],
+        "additionalProperties": false
+      }
+    },
+    "url": { "type": "string" }
+  },
+  "required": ["category", "cuisine", "keywords", "name", "description", "heroImage", "ingredients", "steps", "url"],
+  "additionalProperties": false
+}
+
 ### JSONLD Data:
 ${JSON.stringify(jsonLd)}`;
-
-  try {
-    const result: string = await askAI(prompt);
-
-    // Strip markdown code fences if the model wraps its response (common for free models)
-    const cleaned = result.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '').trim();
-    const parsed = JSON.parse(cleaned);
-
-    return parsed;
-  } catch (error) {
-    console.error(error);
-  }
-  return null;
 };

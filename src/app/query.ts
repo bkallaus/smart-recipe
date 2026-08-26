@@ -1,7 +1,7 @@
 'use server';
 import { insertRecipe } from '@/server-actions/recipes';
 import ogs from 'open-graph-scraper';
-import { convertJsonLdToIngest, smartIngest } from '../helpers/ingest-helper';
+import { convertJsonLdToIngest } from '../helpers/ingest-helper';
 import { toggleFavoriteRecipe } from '@/server-actions/favorite-recipes';
 import { downloadUploadImage } from '@/server-actions/image-service';
 
@@ -42,7 +42,7 @@ export const ingestRecipe = async (url: string, uuid?: string) => {
     return result.uuid;
 };
 
-export const smartIngestRecipe = async (url: string) => {
+export const fetchRecipeJsonLd = async (url: string) => {
     const options = {
         url,
     };
@@ -53,12 +53,10 @@ export const smartIngestRecipe = async (url: string) => {
         throw new Error('Could not ingest recipe');
     }
 
-    const mappedRecipe = await smartIngest(results.result.jsonLD);
+    return results.result.jsonLD;
+};
 
-    if (!mappedRecipe) {
-        throw new Error('Could not parse recipe');
-    }
-
+export const saveSmartIngestedRecipe = async (mappedRecipe: any) => {
     if (mappedRecipe.heroImage) {
         const remappedHeroImage = await downloadUploadImage(mappedRecipe.heroImage);
         if (remappedHeroImage) {

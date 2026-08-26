@@ -1,5 +1,4 @@
 "use client";
-import { callGemini } from "@/server-actions/gemini-proxy";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
@@ -7,9 +6,13 @@ export const AskAIQuestion = () => {
   const [question, setQuestion] = useState("");
 
   const askAI = async (question: string) => {
-    const response = await callGemini(question);
-
-    console.log(response);
+    try {
+      const session = await window.ai.languageModel.create();
+      const response = await session.prompt(question);
+      console.log(response);
+    } catch (error) {
+      console.error("Failed to query local AI model:", error);
+    }
   };
 
   return (
