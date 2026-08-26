@@ -1,7 +1,10 @@
 import RecipeRow from "@/components/recipe-row";
+import { requireAccess } from "@/helpers/require-access";
 import { getAllFavoriteRecipes } from "@/server-actions/favorite-recipes";
 
 const FavoritePage = async () => {
+  await requireAccess("/favorite");
+
   const favoriteRecipes = await getAllFavoriteRecipes();
 
   return (

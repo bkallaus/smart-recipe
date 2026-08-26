@@ -2,6 +2,7 @@ import SmartReIngestButton from "@/components/smart-reingest-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getFullRecipeById } from "@/server-actions/recipes";
+import { requireAccess } from "@/helpers/require-access";
 import { notFound } from "next/navigation";
 import { titleCase } from "title-case";
 import StepsOrSections from "./steps-or-sections";
@@ -18,6 +19,9 @@ const IndividualRecipe = async ({
   }>;
 }) => {
   const { uuid } = await params;
+
+  await requireAccess(`/recipe/${uuid}`);
+
   const recipe = await getFullRecipeById(uuid);
 
   if (!recipe) {
