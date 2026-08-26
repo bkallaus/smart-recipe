@@ -1,10 +1,16 @@
 import RecipeRow from "@/components/recipe-row";
 import SearchRecipes from "@/components/search-recipes";
+import SignedOutHome from "@/components/signed-out-home";
 import { getFavoriteRecipes } from "@/server-actions/favorite-recipes";
 import { getRecentRecipes } from "@/server-actions/recipes";
+import { hasAccess } from "@/server-actions/verify-credentials";
 import Link from "next/link";
 
 const Home = async () => {
+  if (!(await hasAccess())) {
+    return <SignedOutHome />;
+  }
+
   const recentRecipes = await getRecentRecipes(6);
   const favoriteRecipes = await getFavoriteRecipes(6);
 
