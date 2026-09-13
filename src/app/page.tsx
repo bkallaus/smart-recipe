@@ -1,3 +1,4 @@
+import PasteRecipe from "@/components/paste-recipe";
 import RecipeRow from "@/components/recipe-row";
 import SearchRecipes from "@/components/search-recipes";
 import SignedOutHome from "@/components/signed-out-home";
@@ -58,6 +59,9 @@ const Home = async () => {
           <RecipeRow recipes={recentRecipes} />
         </div>
       </section>
+
+      {/* Paste Recipe Section */}
+      <PasteRecipe />
     </main>
   );
 };

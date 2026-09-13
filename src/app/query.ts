@@ -1,7 +1,11 @@
 'use server';
 import { insertRecipe } from '@/server-actions/recipes';
 import ogs from 'open-graph-scraper';
-import { convertJsonLdToIngest, smartIngest } from '../helpers/ingest-helper';
+import {
+    convertJsonLdToIngest,
+    parseRecipeText,
+    smartIngest,
+} from '../helpers/ingest-helper';
 import { toggleFavoriteRecipe } from '@/server-actions/favorite-recipes';
 import { downloadUploadImage } from '@/server-actions/image-service';
 
@@ -65,6 +69,42 @@ export const smartIngestRecipe = async (url: string) => {
             mappedRecipe.heroImage = remappedHeroImage;
         }
     }
+
+    const result = await insertRecipe(mappedRecipe);
+
+    if (!result) {
+        throw new Error('Failed to insert recipe');
+    }
+
+    await toggleFavoriteRecipe(result.uuid);
+
+    return result.uuid;
+};
+
+export const ingestRecipeFromText = async (recipeText: string) => {
+    const text = recipeText?.trim();
+
+    if (!text) {
+        throw new Error('Recipe text is required');
+    }
+
+    const mappedRecipe = await parseRecipeText(text);
+
+    if (!mappedRecipe?.name || !mappedRecipe.ingredients?.length) {
+        throw new Error('Could not parse recipe text');
+    }
+
+    mappedRecipe.steps = mappedRecipe.steps ?? [];
+
+    // The pasted text has no page to scrape, so only keep links the model
+    // found inside the text itself.
+    mappedRecipe.url = mappedRecipe.url?.startsWith('http')
+        ? mappedRecipe.url
+        : '';
+
+    mappedRecipe.heroImage = mappedRecipe.heroImage?.startsWith('http')
+        ? ((await downloadUploadImage(mappedRecipe.heroImage)) ?? '')
+        : '';
 
     const result = await insertRecipe(mappedRecipe);
 

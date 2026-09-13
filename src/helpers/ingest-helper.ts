@@ -141,6 +141,23 @@ export const convertJsonLdToIngest = async (
   return mappedRecipe;
 };
 
+const askAiForRecipe = async (prompt: string): Promise<IngestRecipe | null> => {
+  try {
+    const result: string = await askAI(prompt);
+
+    // Strip markdown code fences if the model wraps its response (common for free models)
+    const cleaned = result
+      .replace(/^```(?:json)?\s*/i, '')
+      .replace(/\s*```\s*$/, '')
+      .trim();
+
+    return JSON.parse(cleaned);
+  } catch (error) {
+    console.error(error);
+  }
+  return null;
+};
+
 export const smartIngest = async (
   jsonLd: any,
 ): Promise<IngestRecipe | null> => {
@@ -163,16 +180,33 @@ export const smartIngest = async (
 ### JSONLD Data:
 ${JSON.stringify(jsonLd)}`;
 
-  try {
-    const result: string = await askAI(prompt);
+  return askAiForRecipe(prompt);
+};
 
-    // Strip markdown code fences if the model wraps its response (common for free models)
-    const cleaned = result.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '').trim();
-    const parsed = JSON.parse(cleaned);
+export const parseRecipeText = async (
+  recipeText: string,
+): Promise<IngestRecipe | null> => {
+  const prompt: string = `Convert the following raw recipe text, pasted by a user from a cookbook, an email or a website, into a structured JSON format.
 
-    return parsed;
-  } catch (error) {
-    console.error(error);
-  }
-  return null;
+### Instructions:
+1.  **Metadata Extraction**:
+    - Extract \`yield\`, \`prepTime\`, \`cookTime\`, and \`totalTime\` if available.
+    - Append these details to the start of the \`description\` field in a human-readable format (e.g., "Yield: 4 servings | Prep: 10 mins | Cook: 30 mins").
+2.  **Ingredients**:
+    - If ingredients are grouped into sections (e.g., "For the crust", "For the filling"), prefix each ingredient with its section name in brackets, like: "[Crust] 1 cup flour".
+    - If no sections exist, provide the plain ingredient strings.
+3.  **Instructions/Steps**:
+    - Keep the steps in the order they appear in the text and strip any leading numbering (e.g. "1.", "Step 2:").
+    - If steps are grouped under a heading, use that heading as the \`section\` field for each step in that group.
+4.  **Taxonomy**:
+    - Provide a concise \`category\` (e.g., "Dessert"), \`cuisine\` (e.g., "Italian"), and \`keywords\` (comma-separated).
+5.  **Fidelity**:
+    - Only use information present in the text. Never invent ingredients or steps.
+    - Ignore unrelated content such as ads, navigation, comments or personal stories.
+    - Use an empty string for \`heroImage\`, and for \`url\` unless a source URL appears in the text.
+
+### Recipe Text:
+${recipeText}`;
+
+  return askAiForRecipe(prompt);
 };

@@ -58,9 +58,11 @@ const IndividualRecipe = async ({
 
           <div className="flex flex-wrap gap-4 items-center">
             <FavoriteButton uuid={recipe.uuid} isFavorite={recipe.is_favorite} />
-            <Button asChild variant="secondary" className="rounded-full bg-[hsl(var(--surface-container-highest))] border-0 text-[hsl(var(--on-surface))] hover:bg-[hsl(var(--surface-container-high))]">
-              <a href={recipe.url} target="_blank" rel="noopener noreferrer">Original Recipe</a>
-            </Button>
+            {recipe.url && (
+              <Button asChild variant="secondary" className="rounded-full bg-[hsl(var(--surface-container-highest))] border-0 text-[hsl(var(--on-surface))] hover:bg-[hsl(var(--surface-container-high))]">
+                <a href={recipe.url} target="_blank" rel="noopener noreferrer">Original Recipe</a>
+              </Button>
+            )}
             <WakeLockButton />
           </div>
 
@@ -120,17 +122,20 @@ const IndividualRecipe = async ({
         </section>
 
         {/* Footer actions */}
-        <footer className="pt-16 mt-24 border-t border-[hsl(var(--outline-variant)/0.2)]">
-          <div className="bg-[hsl(var(--surface-container-low))] p-8 rounded-2xl flex flex-col md:flex-row justify-between items-center gap-6">
-            <div className="space-y-1 text-center md:text-left">
-              <h3 className="text-xl font-semibold">Missing information?</h3>
-              <p className="text-[hsl(var(--on-surface-variant))]">You can re-ingest the recipe to get more details.</p>
+        {/* Re-ingesting scrapes the original page, so it needs a source URL. */}
+        {recipe.url && (
+          <footer className="pt-16 mt-24 border-t border-[hsl(var(--outline-variant)/0.2)]">
+            <div className="bg-[hsl(var(--surface-container-low))] p-8 rounded-2xl flex flex-col md:flex-row justify-between items-center gap-6">
+              <div className="space-y-1 text-center md:text-left">
+                <h3 className="text-xl font-semibold">Missing information?</h3>
+                <p className="text-[hsl(var(--on-surface-variant))]">You can re-ingest the recipe to get more details.</p>
+              </div>
+              <div className="flex gap-4">
+                <SmartReIngestButton recipe={recipe} />
+              </div>
             </div>
-            <div className="flex gap-4">
-              <SmartReIngestButton recipe={recipe} />
-            </div>
-          </div>
-        </footer>
+          </footer>
+        )}
       </div>
     </main>
   );
