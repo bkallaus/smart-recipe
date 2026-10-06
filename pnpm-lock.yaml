@@ -44,6 +44,9 @@ importers:
       '@vercel/analytics':
         specifier: ^1.5.0
         version: 1.6.1(next@16.3.6(@babel/core@7.29.0)(@types/node@20.19.33)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)
+      cheerio:
+        specifier: ^1.2.0
+        version: 1.2.0
       class-variance-authority:
         specifier: ^0.7.0
         version: 0.7.1

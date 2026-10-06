@@ -8,6 +8,10 @@ import {
     parseRecipeText,
     smartIngest,
 } from '../helpers/ingest-helper';
+import {
+    extractMicrodataRecipe,
+    getRecipeSectionHtml,
+} from '../helpers/recipe-html';
 import type { IngestRecipe } from '@/types/ingest';
 import { toggleFavoriteRecipe } from '@/server-actions/favorite-recipes';
 import { downloadUploadImage } from '@/server-actions/image-service';
@@ -32,22 +36,31 @@ const scrapeRecipePage = async (url: string) => {
     return results;
 };
 
-// Fallback for pages without recipe JSON-LD: let the model read the page text
+// Last resort for pages without structured recipe data: let the model read
+// the recipe card, or the whole page when there is no card
 const parseRecipePage = async (
     html: string | undefined,
     url: string,
     ogImage: string | undefined,
-): Promise<IngestRecipe | null> => {
-    const text = html ? htmlToRecipeText(html) : '';
+): Promise<IngestRecipe> => {
+    const text = html ? htmlToRecipeText(getRecipeSectionHtml(html)) : '';
 
     if (!text) {
-        return null;
+        throw new Error('No recipe data found and the page has no readable text');
     }
 
     const mappedRecipe = await parseRecipeText(text);
 
-    if (!mappedRecipe?.name || !mappedRecipe.ingredients?.length) {
-        return null;
+    if (!mappedRecipe) {
+        throw new Error(
+            'No recipe data found and the AI could not parse the page text',
+        );
+    }
+
+    if (!mappedRecipe.name || !mappedRecipe.ingredients?.length) {
+        throw new Error(
+            'No recipe data found and the AI found no recipe in the page text',
+        );
     }
 
     return {
@@ -57,6 +70,15 @@ const parseRecipePage = async (
         heroImage: ogImage ?? '',
     };
 };
+
+const findStructuredRecipe = async (
+    jsonLD: unknown,
+    html: string | undefined,
+    url: string,
+    ogImage: string | undefined,
+) =>
+    (await convertJsonLdToIngest(jsonLD, url)) ??
+    (html ? extractMicrodataRecipe(html, url, ogImage) : null);
 
 const saveIngestedRecipe = async (mappedRecipe: IngestRecipe, uuid?: string) => {
     if (mappedRecipe.heroImage) {
@@ -115,13 +137,10 @@ const withFailedIngestLog = async <T>(
 const scrapeAndSaveRecipe = async (url: string, uuid?: string) => {
     const { result, html } = await scrapeRecipePage(url);
 
+    const ogImage = result.ogImage?.[0]?.url;
     const mappedRecipe =
-        (await convertJsonLdToIngest(result.jsonLD, url)) ??
-        (await parseRecipePage(html, url, result.ogImage?.[0]?.url));
-
-    if (!mappedRecipe) {
-        throw new Error('Could not find a recipe on this page');
-    }
+        (await findStructuredRecipe(result.jsonLD, html, url, ogImage)) ??
+        (await parseRecipePage(html, url, ogImage));
 
     return saveIngestedRecipe(mappedRecipe, uuid);
 };
@@ -129,13 +148,20 @@ const scrapeAndSaveRecipe = async (url: string, uuid?: string) => {
 const smartScrapeAndSaveRecipe = async (url: string) => {
     const { result, html } = await scrapeRecipePage(url);
 
-    const mappedRecipe = findRecipeIngredients(result.jsonLD)
-        ? await smartIngest(result.jsonLD)
-        : await parseRecipePage(html, url, result.ogImage?.[0]?.url);
+    if (findRecipeIngredients(result.jsonLD)) {
+        const mappedRecipe = await smartIngest(result.jsonLD);
 
-    if (!mappedRecipe) {
-        throw new Error('Could not parse recipe');
+        if (!mappedRecipe) {
+            throw new Error('The AI could not parse the recipe JSON-LD');
+        }
+
+        return saveIngestedRecipe(mappedRecipe);
     }
+
+    const ogImage = result.ogImage?.[0]?.url;
+    const mappedRecipe =
+        (html ? extractMicrodataRecipe(html, url, ogImage) : null) ??
+        (await parseRecipePage(html, url, ogImage));
 
     return saveIngestedRecipe(mappedRecipe);
 };
