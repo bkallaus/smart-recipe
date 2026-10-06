@@ -3,7 +3,6 @@ import { Loader2, Sparkles } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { ingestRecipe } from '@/app/query';
-import { insertIntoFailedIngest } from '@/server-actions/recipes';
 import { useToast } from './ui/use-toast';
 
 const useRecipeIngest = () => {
@@ -33,9 +32,6 @@ const useRecipeIngest = () => {
       router.push(`/recipe/${recipeId}`);
     } catch (error) {
       console.error('failed to ingest:', error);
-      if (url) {
-        await insertIntoFailedIngest(url);
-      }
       toast({
         title: 'Error Ingesting Recipe',
         description:
