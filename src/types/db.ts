@@ -15,6 +15,7 @@ export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
 export interface FailedIngest {
   created_at: Generated<Timestamp>;
+  error: string | null;
   id: Generated<Int8>;
   url: string;
 }

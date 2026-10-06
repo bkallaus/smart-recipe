@@ -185,8 +185,11 @@ export const deleteRecipe = async (id: number) => {
     .execute();
 };
 
-export const insertIntoFailedIngest = async (url: string) => {
-  await db.insertInto('failed_ingest').values({ url }).execute();
+export const insertIntoFailedIngest = async (url: string, error?: string) => {
+  await db
+    .insertInto('failed_ingest')
+    .values({ url, error: error ?? null })
+    .execute();
 };
 
 export const editRecipe = async (recipe: FullRecipe, id: number) => {

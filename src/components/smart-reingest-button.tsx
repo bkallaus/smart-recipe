@@ -1,6 +1,6 @@
 "use client";
 import { smartIngestRecipe } from "@/app/query";
-import { deleteRecipe, insertIntoFailedIngest } from "@/server-actions/recipes";
+import { deleteRecipe } from "@/server-actions/recipes";
 import type { FullRecipe } from "@/types/recipe";
 import { Button } from "./ui/button";
 import { useState } from "react";
@@ -31,7 +31,6 @@ const SmartReIngestButton = ({ recipe }: { recipe: FullRecipe }) => {
         title: "Update Failed",
         description: "Recipe has failed to update",
       });
-      await insertIntoFailedIngest(recipe.url);
     } finally {
       setLoading(false);
     }

@@ -1,5 +1,5 @@
 'use server';
-import { insertRecipe } from '@/server-actions/recipes';
+import { insertIntoFailedIngest, insertRecipe } from '@/server-actions/recipes';
 import ogs from 'open-graph-scraper';
 import {
     convertJsonLdToIngest,
@@ -77,7 +77,42 @@ const saveIngestedRecipe = async (mappedRecipe: IngestRecipe, uuid?: string) => 
     return result.uuid;
 };
 
-export const ingestRecipe = async (url: string, uuid?: string) => {
+const getErrorMessage = (error: unknown): string => {
+    if (error instanceof Error) {
+        return error.message;
+    }
+
+    // open-graph-scraper rejects with its result object instead of an Error
+    const ogsError = (error as { result?: { error?: string } } | null)?.result
+        ?.error;
+
+    if (ogsError) {
+        return ogsError;
+    }
+
+    return typeof error === 'string' ? error : JSON.stringify(error);
+};
+
+// Logs the failure with its error on the server, where the message is still
+// available (Next.js hides server action errors from the client in production)
+const withFailedIngestLog = async <T>(
+    url: string,
+    ingest: () => Promise<T>,
+): Promise<T> => {
+    try {
+        return await ingest();
+    } catch (error) {
+        try {
+            await insertIntoFailedIngest(url, getErrorMessage(error));
+        } catch (logError) {
+            console.error('failed to log failed ingest:', logError);
+        }
+
+        throw error;
+    }
+};
+
+const scrapeAndSaveRecipe = async (url: string, uuid?: string) => {
     const { result, html } = await scrapeRecipePage(url);
 
     const mappedRecipe =
@@ -91,7 +126,7 @@ export const ingestRecipe = async (url: string, uuid?: string) => {
     return saveIngestedRecipe(mappedRecipe, uuid);
 };
 
-export const smartIngestRecipe = async (url: string) => {
+const smartScrapeAndSaveRecipe = async (url: string) => {
     const { result, html } = await scrapeRecipePage(url);
 
     const mappedRecipe = findRecipeIngredients(result.jsonLD)
@@ -104,6 +139,12 @@ export const smartIngestRecipe = async (url: string) => {
 
     return saveIngestedRecipe(mappedRecipe);
 };
+
+export const ingestRecipe = async (url: string, uuid?: string) =>
+    withFailedIngestLog(url, () => scrapeAndSaveRecipe(url, uuid));
+
+export const smartIngestRecipe = async (url: string) =>
+    withFailedIngestLog(url, () => smartScrapeAndSaveRecipe(url));
 
 export const ingestRecipeFromText = async (recipeText: string) => {
     const text = recipeText?.trim();
