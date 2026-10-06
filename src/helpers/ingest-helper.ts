@@ -13,6 +13,10 @@ type InstructionsWithItems = {
   name: string;
 };
 
+type RecipeInstructions =
+  | string
+  | (string | IngestInstruction | InstructionsWithItems)[];
+
 type RecipeJson = {
   name: string;
   recipeCuisine: string;
@@ -20,8 +24,10 @@ type RecipeJson = {
   keywords: string;
   headline: string;
   description: string;
-  recipeIngredient: string[];
-  recipeInstructions: (IngestInstruction | InstructionsWithItems)[];
+  recipeIngredient: string | string[];
+  // Older (pre-2016) schema.org name for recipeIngredient
+  ingredients?: string | string[];
+  recipeInstructions?: RecipeInstructions;
   image: string | string[] | { url: string };
   thumbnailUrl: string;
 };
@@ -35,25 +41,53 @@ const getInstructionFromItem = (item: IngestInstruction): Instruction => {
 };
 
 const getIntructionsFromArray = (list: IngestInstruction[]) => {
-  const sorted = list.sort((a, b) => a.position - b.position);
+  // Keep the page order for steps without a position
+  const sorted = list
+    .map((item, index) => ({ item, index }))
+    .toSorted(
+      (a, b) =>
+        (a.item.position ?? a.index) - (b.item.position ?? b.index) ||
+        a.index - b.index,
+    );
 
-  return sorted.map(getInstructionFromItem);
+  return sorted.map(({ item }) => getInstructionFromItem(item));
 };
 
+const STEP_SPLIT_REGEX = /\r?\n+/;
+
 const getInstructionsWithSection = (recipeJson: RecipeJson): Instruction[] => {
-  const stringIngredients = recipeJson.recipeInstructions.flatMap(
-    (list: InstructionsWithItems | IngestInstruction) => {
-      if (!('itemListElement' in list)) {
+  const instructions = recipeJson.recipeInstructions;
+
+  if (!instructions) {
+    return [];
+  }
+
+  // Some recipe plugins emit all steps as one string
+  const list =
+    typeof instructions === 'string'
+      ? instructions
+          .split(STEP_SPLIT_REGEX)
+          .map((text) => text.trim())
+          .filter(Boolean)
+      : instructions;
+
+  const stringIngredients = list.flatMap(
+    (step: string | InstructionsWithItems | IngestInstruction) => {
+      if (typeof step === 'string') {
+        return { name: step, text: step } as IngestInstruction;
+      }
+
+      if (!('itemListElement' in step)) {
         return {
-          name: list.name,
-          text: list.text,
-          position: list.position,
+          name: step.name,
+          text: step.text,
+          position: step.position,
         } as IngestInstruction;
       }
 
-      const section = list.name;
+      const section = step.name;
 
-      return list.itemListElement.map(
+      return step.itemListElement.map(
         (item: IngestInstruction) =>
           ({
             name: item.name,
@@ -68,13 +102,23 @@ const getInstructionsWithSection = (recipeJson: RecipeJson): Instruction[] => {
   return getIntructionsFromArray(stringIngredients);
 };
 
+const toStringArray = (value: string | string[] | undefined): string[] => {
+  if (!value) {
+    return [];
+  }
+
+  return Array.isArray(value) ? value : [value];
+};
+
 const convertRecipe = (
   recipeJson: RecipeJson,
   originalUrl: string,
 ): IngestRecipe => {
   const name = recipeJson.name ?? recipeJson.headline;
   const description = recipeJson.description;
-  const ingredients = recipeJson.recipeIngredient;
+  const ingredients = toStringArray(
+    recipeJson.recipeIngredient ?? recipeJson.ingredients,
+  );
   const steps = getInstructionsWithSection(recipeJson);
 
   const image = Array.isArray(recipeJson.image)
@@ -105,12 +149,18 @@ const convertRecipe = (
   };
 };
 
+const isRecipeType = (data: { '@type'?: unknown }): boolean => {
+  const type = data['@type'];
+
+  return Array.isArray(type) ? type.includes('Recipe') : type === 'Recipe';
+};
+
 export const findRecipeIngredients = (data: any): RecipeJson | null => {
   if (!data) {
     return null;
   }
 
-  if (data.recipeIngredient) {
+  if (data.recipeIngredient || (isRecipeType(data) && data.ingredients)) {
     return data;
   }
 
@@ -136,7 +186,15 @@ export const convertJsonLdToIngest = async (
 ): Promise<IngestRecipe | null> => {
   const foundRecipe = findRecipeIngredients(jsonLd);
 
-  const mappedRecipe = convertRecipe(foundRecipe as RecipeJson, originalUrl);
+  if (!foundRecipe) {
+    return null;
+  }
+
+  const mappedRecipe = convertRecipe(foundRecipe, originalUrl);
+
+  if (!mappedRecipe.ingredients.length) {
+    return null;
+  }
 
   return mappedRecipe;
 };
@@ -209,4 +267,60 @@ export const parseRecipeText = async (
 ${recipeText}`;
 
   return askAiForRecipe(prompt);
+};
+
+// Keeps the prompt well within the model's context on very long blog posts
+const MAX_PAGE_TEXT_LENGTH = 60000;
+
+const NON_CONTENT_REGEX =
+  /<(script|style|noscript|svg|iframe|template|head)\b[^>]*>[\s\S]*?<\/\1>/gi;
+const COMMENT_REGEX = /<!--[\s\S]*?-->/g;
+const BLOCK_TAG_REGEX =
+  /<\/?(p|div|br|li|ul|ol|h[1-6]|tr|td|th|section|article|header|footer|table)\b[^>]*>/gi;
+const TAG_REGEX = /<[^>]+>/g;
+const ENTITY_REGEX = /&(#x[\da-f]+|#\d+|amp|lt|gt|quot|apos|nbsp|frac12|frac14|frac34|deg);/gi;
+const NAMED_ENTITIES: Record<string, string> = {
+  amp: '&',
+  lt: '<',
+  gt: '>',
+  quot: '"',
+  apos: "'",
+  nbsp: ' ',
+  frac12: '½',
+  frac14: '¼',
+  frac34: '¾',
+  deg: '°',
+};
+
+const decodeEntity = (_match: string, entity: string) => {
+  const lower = entity.toLowerCase();
+
+  if (lower.startsWith('#x')) {
+    return String.fromCodePoint(Number.parseInt(lower.slice(2), 16));
+  }
+
+  if (lower.startsWith('#')) {
+    return String.fromCodePoint(Number.parseInt(lower.slice(1), 10));
+  }
+
+  return NAMED_ENTITIES[lower] ?? '';
+};
+
+/**
+ * Reduces a recipe page's HTML to readable text, for pages whose recipe card
+ * has no JSON-LD (e.g. older microdata-only recipe plugins).
+ */
+export const htmlToRecipeText = (html: string): string => {
+  const text = html
+    .replace(NON_CONTENT_REGEX, ' ')
+    .replace(COMMENT_REGEX, ' ')
+    .replace(BLOCK_TAG_REGEX, '\n')
+    .replace(TAG_REGEX, ' ')
+    .replace(ENTITY_REGEX, decodeEntity)
+    .split('\n')
+    .map((line) => line.replace(/\s+/g, ' ').trim())
+    .filter(Boolean)
+    .join('\n');
+
+  return text.slice(0, MAX_PAGE_TEXT_LENGTH);
 };

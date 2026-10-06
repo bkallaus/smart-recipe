@@ -3,31 +3,62 @@ import { insertRecipe } from '@/server-actions/recipes';
 import ogs from 'open-graph-scraper';
 import {
     convertJsonLdToIngest,
+    findRecipeIngredients,
+    htmlToRecipeText,
     parseRecipeText,
     smartIngest,
 } from '../helpers/ingest-helper';
+import type { IngestRecipe } from '@/types/ingest';
 import { toggleFavoriteRecipe } from '@/server-actions/favorite-recipes';
 import { downloadUploadImage } from '@/server-actions/image-service';
 
-export const ingestRecipe = async (url: string, uuid?: string) => {
-    const options = {
-        url,
-    };
+// Many recipe sites reject requests without a browser user agent
+const FETCH_OPTIONS = {
+    headers: {
+        'user-agent':
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36',
+        accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'accept-language': 'en-US,en;q=0.9',
+    },
+};
 
-    const results = await ogs(options);
+const scrapeRecipePage = async (url: string) => {
+    const results = await ogs({ url, fetchOptions: FETCH_OPTIONS });
 
     if (results.error) {
         throw new Error('Could not ingest recipe');
     }
 
-    const json = results.result.jsonLD;
+    return results;
+};
 
-    const mappedRecipe = await convertJsonLdToIngest(json, url);
+// Fallback for pages without recipe JSON-LD: let the model read the page text
+const parseRecipePage = async (
+    html: string | undefined,
+    url: string,
+    ogImage: string | undefined,
+): Promise<IngestRecipe | null> => {
+    const text = html ? htmlToRecipeText(html) : '';
 
-    if (!mappedRecipe) {
-        throw new Error('Could not convert jsonLD to ingest recipe');
+    if (!text) {
+        return null;
     }
 
+    const mappedRecipe = await parseRecipeText(text);
+
+    if (!mappedRecipe?.name || !mappedRecipe.ingredients?.length) {
+        return null;
+    }
+
+    return {
+        ...mappedRecipe,
+        steps: mappedRecipe.steps ?? [],
+        url,
+        heroImage: ogImage ?? '',
+    };
+};
+
+const saveIngestedRecipe = async (mappedRecipe: IngestRecipe, uuid?: string) => {
     if (mappedRecipe.heroImage) {
         const remappedHeroImage = await downloadUploadImage(mappedRecipe.heroImage);
         if (remappedHeroImage) {
@@ -46,39 +77,32 @@ export const ingestRecipe = async (url: string, uuid?: string) => {
     return result.uuid;
 };
 
-export const smartIngestRecipe = async (url: string) => {
-    const options = {
-        url,
-    };
+export const ingestRecipe = async (url: string, uuid?: string) => {
+    const { result, html } = await scrapeRecipePage(url);
 
-    const results = await ogs(options);
+    const mappedRecipe =
+        (await convertJsonLdToIngest(result.jsonLD, url)) ??
+        (await parseRecipePage(html, url, result.ogImage?.[0]?.url));
 
-    if (results.error) {
-        throw new Error('Could not ingest recipe');
+    if (!mappedRecipe) {
+        throw new Error('Could not find a recipe on this page');
     }
 
-    const mappedRecipe = await smartIngest(results.result.jsonLD);
+    return saveIngestedRecipe(mappedRecipe, uuid);
+};
+
+export const smartIngestRecipe = async (url: string) => {
+    const { result, html } = await scrapeRecipePage(url);
+
+    const mappedRecipe = findRecipeIngredients(result.jsonLD)
+        ? await smartIngest(result.jsonLD)
+        : await parseRecipePage(html, url, result.ogImage?.[0]?.url);
 
     if (!mappedRecipe) {
         throw new Error('Could not parse recipe');
     }
 
-    if (mappedRecipe.heroImage) {
-        const remappedHeroImage = await downloadUploadImage(mappedRecipe.heroImage);
-        if (remappedHeroImage) {
-            mappedRecipe.heroImage = remappedHeroImage;
-        }
-    }
-
-    const result = await insertRecipe(mappedRecipe);
-
-    if (!result) {
-        throw new Error('Failed to insert recipe');
-    }
-
-    await toggleFavoriteRecipe(result.uuid);
-
-    return result.uuid;
+    return saveIngestedRecipe(mappedRecipe);
 };
 
 export const ingestRecipeFromText = async (recipeText: string) => {
