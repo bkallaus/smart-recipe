@@ -15,6 +15,12 @@ const MicrodataPage = `<html><head><title>Monster Cookies | Blog</title></head><
       <h2 itemprop="name">Healthy Classic Monster Cookies</h2>
       <img itemprop="image" src="https://example.com/cookies.jpg" />
       <p itemprop="description">Soft and chewy.</p>
+      <meta itemprop="prepTime" content="PT10M" />
+      <time itemprop="cookTime" datetime="PT1H5M">1 hour 5 minutes</time>
+      <span itemprop="recipeYield">24 cookies</span>
+      <div itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">Jane Baker</span>
+      </div>
       <ul>
         <li itemprop="ingredients">1 &frac12; cups old-fashioned oats</li>
         <li itemprop="ingredients">½ cup creamy peanut butter</li>
@@ -57,6 +63,11 @@ describe('extractMicrodataRecipe', () => {
         },
       ],
       url,
+      prepMinutes: 10,
+      cookMinutes: 65,
+      totalMinutes: 75,
+      servings: '24 cookies',
+      author: 'Jane Baker',
     });
   });
 

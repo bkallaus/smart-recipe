@@ -2,6 +2,7 @@ import * as cheerio from 'cheerio';
 import type { CheerioAPI } from 'cheerio';
 import type { IngestRecipe } from '@/types/ingest';
 import { htmlToRecipeText } from './ingest-helper';
+import { getTotalMinutes, parseDurationMinutes } from './recipe-metadata';
 
 type Selection = ReturnType<CheerioAPI>;
 
@@ -39,6 +40,23 @@ const getOwnProps = ($: CheerioAPI, root: Selection, names: string[]) =>
 
 const getPropText = ($: CheerioAPI, el: Selection) =>
   (el.attr('content') ?? el.text()).replace(/\s+/g, ' ').trim();
+
+// Durations are usually in a <meta content> or <time datetime> attribute
+const getDurationMinutes = ($: CheerioAPI, root: Selection, name: string) => {
+  const el = getOwnProps($, root, [name]).first();
+
+  return parseDurationMinutes(el.attr('datetime') ?? getPropText($, el));
+};
+
+// The author is either plain text or a nested Person with its own name
+const getAuthor = ($: CheerioAPI, root: Selection) => {
+  const el = getOwnProps($, root, ['author']).first();
+  const name = el.is('[itemscope]')
+    ? getOwnProps($, el, ['name']).first()
+    : el;
+
+  return getPropText($, name.length ? name : el);
+};
 
 const getPropLines = ($: CheerioAPI, el: Selection) =>
   el.attr('content')
@@ -83,6 +101,9 @@ export const extractMicrodataRecipe = (
     getPropText($, getOwnProps($, root, ['name']).first()) ||
     $('title').text().trim();
 
+  const prepMinutes = getDurationMinutes($, root, 'prepTime');
+  const cookMinutes = getDurationMinutes($, root, 'cookTime');
+
   return {
     name,
     description: getPropText($, getOwnProps($, root, ['description']).first()),
@@ -93,6 +114,15 @@ export const extractMicrodataRecipe = (
     ingredients,
     steps,
     url: originalUrl,
+    prepMinutes,
+    cookMinutes,
+    totalMinutes: getTotalMinutes(
+      getDurationMinutes($, root, 'totalTime'),
+      prepMinutes,
+      cookMinutes,
+    ),
+    servings: getPropText($, getOwnProps($, root, ['recipeYield']).first()),
+    author: getAuthor($, root),
   };
 };
 

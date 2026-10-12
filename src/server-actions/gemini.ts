@@ -33,8 +33,13 @@ const recipeSchema = {
       },
     },
     url: { type: 'string' },
+    prepMinutes: { type: 'integer' },
+    cookMinutes: { type: 'integer' },
+    totalMinutes: { type: 'integer' },
+    servings: { type: 'string' },
+    author: { type: 'string' },
   },
-  required: ['category', 'cuisine', 'keywords', 'name', 'description', 'heroImage', 'ingredients', 'steps', 'url'],
+  required: ['category', 'cuisine', 'keywords', 'name', 'description', 'heroImage', 'ingredients', 'steps', 'url', 'prepMinutes', 'cookMinutes', 'totalMinutes', 'servings', 'author'],
   additionalProperties: false,
 };
 

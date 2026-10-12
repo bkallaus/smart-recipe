@@ -8,6 +8,11 @@ export type Recipe = {
   cuisine: string;
   keywords: string;
   url: string;
+  prep_minutes: number | null;
+  cook_minutes: number | null;
+  total_minutes: number | null;
+  servings: string;
+  author: string;
 };
 
 export type Steps = {

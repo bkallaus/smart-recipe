@@ -14,4 +14,16 @@ export type IngestRecipe = {
   ingredients: string[];
   steps: Instruction[];
   url: string;
+  prepMinutes?: number | null;
+  cookMinutes?: number | null;
+  totalMinutes?: number | null;
+  servings?: string;
+  author?: string;
 };
+
+export type IngestSource =
+  | 'json-ld'
+  | 'microdata'
+  | 'ai-json-ld'
+  | 'ai-page'
+  | 'text';

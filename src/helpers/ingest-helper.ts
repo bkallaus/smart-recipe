@@ -1,5 +1,11 @@
 import { askAI } from '@/server-actions/gemini';
 import type { IngestRecipe, Instruction } from '@/types/ingest';
+import {
+  getTotalMinutes,
+  normalizeAuthor,
+  normalizeYield,
+  parseDurationMinutes,
+} from './recipe-metadata';
 
 type IngestInstruction = {
   name: string;
@@ -30,6 +36,11 @@ type RecipeJson = {
   recipeInstructions?: RecipeInstructions;
   image: string | string[] | { url: string };
   thumbnailUrl: string;
+  prepTime?: string;
+  cookTime?: string;
+  totalTime?: string;
+  recipeYield?: string | number | (string | number)[];
+  author?: unknown;
 };
 
 const getInstructionFromItem = (item: IngestInstruction): Instruction => {
@@ -136,6 +147,10 @@ const convertRecipe = (
   const keywords = Array.isArray(recipeJson.keywords)
     ? recipeJson.keywords.join(', ')
     : recipeJson.keywords;
+
+  const prepMinutes = parseDurationMinutes(recipeJson.prepTime);
+  const cookMinutes = parseDurationMinutes(recipeJson.cookTime);
+
   return {
     cuisine,
     category,
@@ -146,6 +161,15 @@ const convertRecipe = (
     description,
     ingredients,
     steps,
+    prepMinutes,
+    cookMinutes,
+    totalMinutes: getTotalMinutes(
+      parseDurationMinutes(recipeJson.totalTime),
+      prepMinutes,
+      cookMinutes,
+    ),
+    servings: normalizeYield(recipeJson.recipeYield),
+    author: normalizeAuthor(recipeJson.author),
   };
 };
 
@@ -209,7 +233,23 @@ const askAiForRecipe = async (prompt: string): Promise<IngestRecipe | null> => {
       .replace(/\s*```\s*$/, '')
       .trim();
 
-    return JSON.parse(cleaned);
+    const parsed: IngestRecipe = JSON.parse(cleaned);
+    const prepMinutes = parseDurationMinutes(parsed.prepMinutes);
+    const cookMinutes = parseDurationMinutes(parsed.cookMinutes);
+
+    // The model uses 0 for unknown times
+    return {
+      ...parsed,
+      prepMinutes,
+      cookMinutes,
+      totalMinutes: getTotalMinutes(
+        parseDurationMinutes(parsed.totalMinutes),
+        prepMinutes,
+        cookMinutes,
+      ),
+      servings: parsed.servings?.trim() ?? '',
+      author: parsed.author?.trim() ?? '',
+    };
   } catch (error) {
     console.error(error);
   }
@@ -223,9 +263,9 @@ export const smartIngest = async (
   const prompt: string = `Convert the following jsonld recipe data into a structured JSON format. 
 
 ### Instructions:
-1.  **Metadata Extraction**: 
-    - Extract \`yield\`, \`prepTime\`, \`cookTime\`, and \`totalTime\` if available.
-    - Append these details to the start of the \`description\` field in a human-readable format (e.g., "Yield: 4 servings | Prep: 10 mins | Cook: 30 mins").
+1.  **Metadata Extraction**:
+    - Put the prep, cook and total times in \`prepMinutes\`, \`cookMinutes\` and \`totalMinutes\` as whole minutes (e.g. "PT1H30M" is 90). Use 0 when a time is not given.
+    - Put the yield in \`servings\` (e.g. "4 servings", "24 cookies") and the recipe author's name in \`author\`. Use an empty string when not given.
 2.  **Ingredients**:
     - If ingredients are grouped into sections (e.g., "For the crust", "For the filling"), prefix each ingredient with its section name in brackets, like: "[Crust] 1 cup flour".
     - If no sections exist, provide the plain ingredient strings.
@@ -248,8 +288,8 @@ export const parseRecipeText = async (
 
 ### Instructions:
 1.  **Metadata Extraction**:
-    - Extract \`yield\`, \`prepTime\`, \`cookTime\`, and \`totalTime\` if available.
-    - Append these details to the start of the \`description\` field in a human-readable format (e.g., "Yield: 4 servings | Prep: 10 mins | Cook: 30 mins").
+    - Put the prep, cook and total times in \`prepMinutes\`, \`cookMinutes\` and \`totalMinutes\` as whole minutes (e.g. "PT1H30M" is 90). Use 0 when a time is not given.
+    - Put the yield in \`servings\` (e.g. "4 servings", "24 cookies") and the recipe author's name in \`author\`. Use an empty string when not given.
 2.  **Ingredients**:
     - If ingredients are grouped into sections (e.g., "For the crust", "For the filling"), prefix each ingredient with its section name in brackets, like: "[Crust] 1 cup flour".
     - If no sections exist, provide the plain ingredient strings.

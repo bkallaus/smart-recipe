@@ -30,14 +30,22 @@ export interface Ingredient {
 }
 
 export interface Recipe {
+  author: string | null;
   category: string | null;
+  cook_minutes: number | null;
   created_at: Generated<Timestamp | null>;
+  created_by: Int8 | null;
   cuisine: string | null;
   description: string | null;
   id: Generated<Int8>;
+  ingest_source: string | null;
   keywords: string | null;
   name: string;
+  prep_minutes: number | null;
   primary_image: string | null;
+  servings: string | null;
+  total_minutes: number | null;
+  updated_at: Timestamp | null;
   url: string | null;
   uuid: Generated<string>;
 }

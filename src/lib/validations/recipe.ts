@@ -7,6 +7,13 @@ export const stepSchema = z.object({
   sort: z.number(),
 });
 
+const minutesSchema = z
+  .number("Enter a number of minutes")
+  .int("Use whole minutes")
+  .min(0)
+  .max(100000)
+  .nullable();
+
 export const recipeSchema = z.object({
   name: z.string().min(1, "Recipe name is required").max(100),
   description: z.string().max(500),
@@ -15,6 +22,11 @@ export const recipeSchema = z.object({
   cuisine: z.string().max(100),
   keywords: z.string().max(500),
   url: z.string().url("Invalid URL").or(z.literal("")),
+  prep_minutes: minutesSchema,
+  cook_minutes: minutesSchema,
+  total_minutes: minutesSchema,
+  servings: z.string().max(100),
+  author: z.string().max(200),
   ingredients: z.array(z.string()).min(1, "At least one ingredient is required"),
   steps: z.array(stepSchema).min(1, "At least one step is required"),
 });

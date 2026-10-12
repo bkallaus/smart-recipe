@@ -12,7 +12,7 @@ import {
     extractMicrodataRecipe,
     getRecipeSectionHtml,
 } from '../helpers/recipe-html';
-import type { IngestRecipe } from '@/types/ingest';
+import type { IngestRecipe, IngestSource } from '@/types/ingest';
 import { toggleFavoriteRecipe } from '@/server-actions/favorite-recipes';
 import { downloadUploadImage } from '@/server-actions/image-service';
 
@@ -71,16 +71,45 @@ const parseRecipePage = async (
     };
 };
 
+type SourcedRecipe = { recipe: IngestRecipe; source: IngestSource };
+
+const findMicrodataRecipe = (
+    html: string | undefined,
+    url: string,
+    ogImage: string | undefined,
+): SourcedRecipe | null => {
+    const recipe = html ? extractMicrodataRecipe(html, url, ogImage) : null;
+
+    return recipe ? { recipe, source: 'microdata' } : null;
+};
+
 const findStructuredRecipe = async (
     jsonLD: unknown,
     html: string | undefined,
     url: string,
     ogImage: string | undefined,
-) =>
-    (await convertJsonLdToIngest(jsonLD, url)) ??
-    (html ? extractMicrodataRecipe(html, url, ogImage) : null);
+): Promise<SourcedRecipe | null> => {
+    const recipe = await convertJsonLdToIngest(jsonLD, url);
 
-const saveIngestedRecipe = async (mappedRecipe: IngestRecipe, uuid?: string) => {
+    return recipe
+        ? { recipe, source: 'json-ld' }
+        : findMicrodataRecipe(html, url, ogImage);
+};
+
+const parseRecipePageWithSource = async (
+    html: string | undefined,
+    url: string,
+    ogImage: string | undefined,
+): Promise<SourcedRecipe> => ({
+    recipe: await parseRecipePage(html, url, ogImage),
+    source: 'ai-page',
+});
+
+const saveIngestedRecipe = async (
+    mappedRecipe: IngestRecipe,
+    source: IngestSource,
+    uuid?: string,
+) => {
     if (mappedRecipe.heroImage) {
         const remappedHeroImage = await downloadUploadImage(mappedRecipe.heroImage);
         if (remappedHeroImage) {
@@ -88,7 +117,7 @@ const saveIngestedRecipe = async (mappedRecipe: IngestRecipe, uuid?: string) => 
         }
     }
 
-    const result = await insertRecipe(mappedRecipe, uuid);
+    const result = await insertRecipe(mappedRecipe, uuid, source);
 
     if (!result) {
         throw new Error('Failed to insert recipe');
@@ -138,11 +167,11 @@ const scrapeAndSaveRecipe = async (url: string, uuid?: string) => {
     const { result, html } = await scrapeRecipePage(url);
 
     const ogImage = result.ogImage?.[0]?.url;
-    const mappedRecipe =
+    const { recipe, source } =
         (await findStructuredRecipe(result.jsonLD, html, url, ogImage)) ??
-        (await parseRecipePage(html, url, ogImage));
+        (await parseRecipePageWithSource(html, url, ogImage));
 
-    return saveIngestedRecipe(mappedRecipe, uuid);
+    return saveIngestedRecipe(recipe, source, uuid);
 };
 
 const smartScrapeAndSaveRecipe = async (url: string) => {
@@ -155,15 +184,15 @@ const smartScrapeAndSaveRecipe = async (url: string) => {
             throw new Error('The AI could not parse the recipe JSON-LD');
         }
 
-        return saveIngestedRecipe(mappedRecipe);
+        return saveIngestedRecipe(mappedRecipe, 'ai-json-ld');
     }
 
     const ogImage = result.ogImage?.[0]?.url;
-    const mappedRecipe =
-        (html ? extractMicrodataRecipe(html, url, ogImage) : null) ??
-        (await parseRecipePage(html, url, ogImage));
+    const { recipe, source } =
+        findMicrodataRecipe(html, url, ogImage) ??
+        (await parseRecipePageWithSource(html, url, ogImage));
 
-    return saveIngestedRecipe(mappedRecipe);
+    return saveIngestedRecipe(recipe, source);
 };
 
 export const ingestRecipe = async (url: string, uuid?: string) =>
@@ -197,7 +226,7 @@ export const ingestRecipeFromText = async (recipeText: string) => {
         ? ((await downloadUploadImage(mappedRecipe.heroImage)) ?? '')
         : '';
 
-    const result = await insertRecipe(mappedRecipe);
+    const result = await insertRecipe(mappedRecipe, undefined, 'text');
 
     if (!result) {
         throw new Error('Failed to insert recipe');

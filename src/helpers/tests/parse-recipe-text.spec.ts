@@ -14,11 +14,16 @@ const RecipeResponse = {
   cuisine: 'American',
   keywords: 'cookies, chocolate',
   name: 'Chocolate Chip Cookies',
-  description: 'Yield: 24 cookies | Prep: 10 mins | Cook: 12 mins',
+  description: 'Classic cookies.',
   heroImage: '',
   ingredients: ['1 cup flour', '1 cup chocolate chips'],
   steps: [{ label: 'Mix', text: 'Mix everything together.' }],
   url: '',
+  prepMinutes: 10,
+  cookMinutes: 12,
+  totalMinutes: 22,
+  servings: '24 cookies',
+  author: 'Grandma',
 };
 
 const PastedText = `Chocolate Chip Cookies
@@ -60,6 +65,27 @@ describe('parseRecipeText', () => {
     const recipe = await parseRecipeText(PastedText);
 
     expect(recipe).toEqual(RecipeResponse);
+  });
+
+  test('should treat zero times from the AI as unknown', async () => {
+    mockedAskAI.mockResolvedValue(
+      JSON.stringify({
+        ...RecipeResponse,
+        prepMinutes: 0,
+        cookMinutes: 0,
+        totalMinutes: 0,
+        servings: ' ',
+      }),
+    );
+
+    const recipe = await parseRecipeText(PastedText);
+
+    expect(recipe).toMatchObject({
+      prepMinutes: null,
+      cookMinutes: null,
+      totalMinutes: null,
+      servings: '',
+    });
   });
 
   test('should return null when the response is not valid JSON', async () => {

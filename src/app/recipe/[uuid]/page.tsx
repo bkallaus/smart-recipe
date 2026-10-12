@@ -10,6 +10,17 @@ import { Paper } from "@/components/paper";
 import { Fragment } from "react";
 import FavoriteButton from "./favorite-button";
 import { WakeLockButton } from "@/components/wake-lock";
+import { formatMinutes } from "@/helpers/recipe-metadata";
+import type { FullRecipe } from "@/types/recipe";
+
+const getRecipeFacts = (recipe: FullRecipe) =>
+  [
+    { label: "Prep", value: recipe.prep_minutes ? formatMinutes(recipe.prep_minutes) : "" },
+    { label: "Cook", value: recipe.cook_minutes ? formatMinutes(recipe.cook_minutes) : "" },
+    { label: "Total", value: recipe.total_minutes ? formatMinutes(recipe.total_minutes) : "" },
+    { label: "Serves", value: recipe.servings },
+    { label: "By", value: recipe.author },
+  ].filter((fact) => fact.value);
 
 const IndividualRecipe = async ({
   params,
@@ -27,6 +38,8 @@ const IndividualRecipe = async ({
   if (!recipe) {
     notFound();
   }
+
+  const facts = getRecipeFacts(recipe);
 
   return (
     <main className="min-h-screen bg-[hsl(var(--surface))] px-6 md:px-12 lg:pl-32 lg:pr-12 py-10 lg:py-24">
@@ -80,6 +93,20 @@ const IndividualRecipe = async ({
             )}
           </div>
         </div>
+
+        {/* Times, yield and author */}
+        {facts.length > 0 ? (
+          <dl className="flex flex-wrap gap-x-10 gap-y-4 -mt-8">
+            {facts.map((fact) => (
+              <div key={fact.label} className="space-y-1">
+                <dt className="text-xs font-bold uppercase tracking-widest text-[hsl(var(--on-surface-variant))]">
+                  {fact.label}
+                </dt>
+                <dd className="text-lg text-[hsl(var(--on-surface))]">{fact.value}</dd>
+              </div>
+            ))}
+          </dl>
+        ) : null}
 
         {/* Description */}
         <div className="max-w-2xl">

@@ -10,6 +10,10 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 
+// Empty number inputs mean the time is unknown
+const toMinutes = (value: unknown) =>
+  value === "" || value === null || value === undefined ? null : Number(value);
+
 const RecipeForm = ({ recipe }: { recipe: FullRecipe }) => {
   const router = useRouter();
   const { toast } = useToast();
@@ -30,6 +34,11 @@ const RecipeForm = ({ recipe }: { recipe: FullRecipe }) => {
       cuisine: recipe.cuisine,
       keywords: recipe.keywords,
       url: recipe.url,
+      prep_minutes: recipe.prep_minutes,
+      cook_minutes: recipe.cook_minutes,
+      total_minutes: recipe.total_minutes,
+      servings: recipe.servings,
+      author: recipe.author,
       ingredients: recipe.ingredients,
       steps: recipe.steps,
     },
@@ -128,6 +137,37 @@ const RecipeForm = ({ recipe }: { recipe: FullRecipe }) => {
                 label="Source URL"
                 {...register("url")}
                 error={errors.url?.message}
+              />
+              <InputWithLabel
+                label="Servings"
+                {...register("servings")}
+                error={errors.servings?.message}
+              />
+              <InputWithLabel
+                label="Author"
+                {...register("author")}
+                error={errors.author?.message}
+              />
+              <InputWithLabel
+                label="Prep Time (minutes)"
+                type="number"
+                min={0}
+                {...register("prep_minutes", { setValueAs: toMinutes })}
+                error={errors.prep_minutes?.message}
+              />
+              <InputWithLabel
+                label="Cook Time (minutes)"
+                type="number"
+                min={0}
+                {...register("cook_minutes", { setValueAs: toMinutes })}
+                error={errors.cook_minutes?.message}
+              />
+              <InputWithLabel
+                label="Total Time (minutes)"
+                type="number"
+                min={0}
+                {...register("total_minutes", { setValueAs: toMinutes })}
+                error={errors.total_minutes?.message}
               />
             </div>
           </div>

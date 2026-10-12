@@ -78,6 +78,7 @@ graph TD
 - **Input**: The user provides a URL of a recipe website.
 - **Processing**: The `askAI` action sends a prompt to **Google Gemini** to extract recipe details (ingredients, steps, metadata) into a structured JSON format.
 - **Storage**: The `insertRecipe` action uses a transaction to save the data into the `recipe`, `ingredient`, and `steps` tables.
+- **Metadata**: Prep/cook/total times (in minutes), servings and author are read from JSON-LD, microdata or the AI response. Each recipe also records its `ingest_source` (`json-ld`, `microdata`, `ai-json-ld`, `ai-page`, `text`), the user who added it (`created_by`) and when it was last edited (`updated_at`). The schema change is in `sql/2026-10-12-recipe-tracking.sql`.
 
 ### 2. Recipe Retrieval
 - **Listing**: The home page calls `getRecentRecipes` and `getFavoriteRecipes` to display cards.

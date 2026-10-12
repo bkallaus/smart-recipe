@@ -1,6 +1,7 @@
 'use server';
 import { db } from '@/lib/db';
-import type { IngestRecipe } from '@/types/ingest';
+import { sql } from 'kysely';
+import type { IngestRecipe, IngestSource } from '@/types/ingest';
 import type { FullRecipe, RecipeCard } from '@/types/recipe';
 import { getUser } from './verify-credentials';
 
@@ -98,6 +99,8 @@ export const getFullRecipeById = async (
     category: recipe.category ?? '',
     cuisine: recipe.cuisine ?? '',
     url: recipe.url ?? '',
+    servings: recipe.servings ?? '',
+    author: recipe.author ?? '',
     is_favorite: !!recipe.is_favorite,
     ingredients: ingredients.map((row) => row.label),
     steps: steps.map((s) => ({
@@ -108,42 +111,41 @@ export const getFullRecipeById = async (
   };
 };
 
-export const insertRecipe = async (recipe: IngestRecipe, uuid?: string) => {
-  const result = await db.transaction().execute(async (trx) => {
-    let recipeId: string; // Kysely returns string for Int8
+export const insertRecipe = async (
+  recipe: IngestRecipe,
+  uuid?: string,
+  source?: IngestSource,
+) => {
+  const user = await getUser();
 
-    if (uuid) {
-      const inserted = await trx
-        .insertInto('recipe')
-        .values({
-          name: recipe.name,
-          description: recipe.description,
-          url: recipe.url,
-          primary_image: recipe.heroImage,
-          cuisine: recipe.cuisine,
-          category: recipe.category,
-          keywords: recipe.keywords,
-          uuid,
-        })
-        .returning('id')
-        .executeTakeFirstOrThrow();
-      recipeId = inserted.id;
-    } else {
-      const inserted = await trx
-        .insertInto('recipe')
-        .values({
-          name: recipe.name,
-          description: recipe.description,
-          url: recipe.url,
-          primary_image: recipe.heroImage,
-          cuisine: recipe.cuisine,
-          category: recipe.category,
-          keywords: recipe.keywords,
-        })
-        .returning('id')
-        .executeTakeFirstOrThrow();
-      recipeId = inserted.id;
-    }
+  const result = await db.transaction().execute(async (trx) => {
+    const inserted = await trx
+      .insertInto('recipe')
+      .values((eb) => ({
+        name: recipe.name,
+        description: recipe.description,
+        url: recipe.url,
+        primary_image: recipe.heroImage,
+        cuisine: recipe.cuisine,
+        category: recipe.category,
+        keywords: recipe.keywords,
+        prep_minutes: recipe.prepMinutes ?? null,
+        cook_minutes: recipe.cookMinutes ?? null,
+        total_minutes: recipe.totalMinutes ?? null,
+        servings: recipe.servings || null,
+        author: recipe.author || null,
+        ingest_source: source ?? null,
+        created_by: user?.email
+          ? eb
+              .selectFrom('users')
+              .select('id')
+              .where('email', '=', user.email)
+          : null,
+        ...(uuid ? { uuid } : {}),
+      }))
+      .returning('id')
+      .executeTakeFirstOrThrow();
+    const recipeId = inserted.id; // Kysely returns string for Int8
 
     if (recipe.ingredients.length > 0) {
       await trx
@@ -204,6 +206,12 @@ export const editRecipe = async (recipe: FullRecipe, id: number) => {
         cuisine: recipe.cuisine,
         category: recipe.category,
         keywords: recipe.keywords,
+        prep_minutes: recipe.prep_minutes,
+        cook_minutes: recipe.cook_minutes,
+        total_minutes: recipe.total_minutes,
+        servings: recipe.servings || null,
+        author: recipe.author || null,
+        updated_at: sql`now()`,
       })
       .where('id', '=', id.toString())
       .execute();
