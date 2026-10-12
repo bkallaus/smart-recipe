@@ -1,0 +1,13 @@
+# Smart Recipe
+
+> A personal recipe collection. Agents can list, read and add recipes through a REST API.
+
+- API spec (OpenAPI 3.1): /api/v1/openapi.json
+- Auth: send `Authorization: Bearer <API key>` (or `X-API-Key: <API key>`) on every request.
+- Format: recipes are schema.org Recipe JSON-LD (https://schema.org/Recipe); errors are RFC 9457 problem details.
+
+## Endpoints
+
+- `GET /api/v1/recipes?q=&limit=&offset=`: list or search recipes (schema.org ItemList)
+- `GET /api/v1/recipes/{id}`: one recipe with ingredients and instructions
+- `POST /api/v1/recipes`: add a recipe; body is a schema.org Recipe with `name`, `recipeIngredient` and `recipeInstructions`
