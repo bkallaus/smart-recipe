@@ -1,6 +1,8 @@
 import GoogleSignIn from "./google-sign-in";
 import { getUser } from "@/server-actions/verify-credentials";
 import RecipeIngest from "./recipe-ingest";
+import { Dices } from "lucide-react";
+import Link from "next/link";
 
 const Header = async () => {
   const user = await getUser();
@@ -20,7 +22,17 @@ const Header = async () => {
             <RecipeIngest />
           </div>
         )}
-        <div>
+        <div className="flex items-center gap-4">
+          {user?.name && (
+            <Link
+              href="/random"
+              className="flex items-center gap-2 text-sm font-medium text-[hsl(var(--on-surface-variant))] hover:text-[hsl(var(--primary))] transition-colors duration-200"
+              title="Pick a random recipe"
+            >
+              <Dices className="h-5 w-5" />
+              <span className="hidden sm:inline">Surprise me</span>
+            </Link>
+          )}
           <GoogleSignIn userName={user?.name} />
         </div>
       </div>
