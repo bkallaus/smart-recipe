@@ -28,3 +28,15 @@ export type RecipeCard = {
   name: string;
   description: string;
 };
+
+export type RandomRecipeFilters = {
+  category?: string;
+  cuisine?: string;
+  ingredient?: string;
+  favoritesOnly?: boolean;
+};
+
+export type RandomRecipeFilterOptions = {
+  categories: string[];
+  cuisines: string[];
+};
