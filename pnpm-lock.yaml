@@ -76,7 +76,7 @@ importers:
         version: 6.12.0
       openai:
         specifier: ^6.33.0
-        version: 6.33.0(ws@8.19.0)(zod@4.3.6)
+        version: 6.33.0(ws@8.19.0)(zod@4.6.7)
       pg:
         specifier: ^8.17.1
         version: 8.18.0
@@ -111,8 +111,8 @@ importers:
         specifier: ^10.0.1
         version: 10.1.0(react@19.2.4)
       zod:
-        specifier: ^4.3.6
-        version: 4.3.6
+        specifier: ^4.6.7
+        version: 4.6.7
     devDependencies:
       '@biomejs/biome':
         specifier: ^2.3.10
@@ -3217,6 +3217,9 @@ packages:
   zod@4.3.6:
     resolution: {integrity: sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg==}
 
+  zod@4.6.7:
+    resolution: {integrity: sha512-g8W2D2kU6a8untc053fX1uVBKzM7yqAxW/3zwk83+6RyF2+SKOuV+c0wBDhUwzV1PaGapmZH+rmcUzPf+3CGwg==}
+
 snapshots:
 
   '@alloc/quick-lru@5.2.0': {}
@@ -5629,7 +5632,7 @@ snapshots:
       micromatch: 4.0.8
       minimist: 1.2.8
       pluralize: 8.0.0
-      zod: 4.3.6
+      zod: 4.6.7
     optionalDependencies:
       pg: 8.18.0
     transitivePeerDependencies:
@@ -5793,10 +5796,10 @@ snapshots:
       iconv-lite: 0.7.3
       undici: 7.28.0
 
-  openai@6.33.0(ws@8.19.0)(zod@4.3.6):
+  openai@6.33.0(ws@8.19.0)(zod@4.6.7):
     optionalDependencies:
       ws: 8.19.0
-      zod: 4.3.6
+      zod: 4.6.7
 
   package-json-from-dist@1.0.1: {}
 
@@ -6341,3 +6344,5 @@ snapshots:
   yallist@3.1.1: {}
 
   zod@4.3.6: {}
+
+  zod@4.6.7: {}
