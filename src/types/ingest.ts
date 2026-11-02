@@ -10,7 +10,6 @@ export type IngestRecipe = {
   keywords: string;
   name: string;
   description: string;
-  heroImage: string;
   ingredients: string[];
   steps: Instruction[];
   url: string;

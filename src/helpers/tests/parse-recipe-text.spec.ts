@@ -15,7 +15,6 @@ const RecipeResponse = {
   keywords: 'cookies, chocolate',
   name: 'Chocolate Chip Cookies',
   description: 'Yield: 24 cookies | Prep: 10 mins | Cook: 12 mins',
-  heroImage: '',
   ingredients: ['1 cup flour', '1 cup chocolate chips'],
   steps: [{ label: 'Mix', text: 'Mix everything together.' }],
   url: '',

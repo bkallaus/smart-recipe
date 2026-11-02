@@ -121,10 +121,6 @@ const convertRecipe = (
   );
   const steps = getInstructionsWithSection(recipeJson);
 
-  const image = Array.isArray(recipeJson.image)
-    ? recipeJson.image[0]
-    : recipeJson.image;
-
   const cuisine = Array.isArray(recipeJson.recipeCuisine)
     ? recipeJson.recipeCuisine.join(', ')
     : recipeJson.recipeCuisine;
@@ -140,7 +136,6 @@ const convertRecipe = (
     cuisine,
     category,
     keywords,
-    heroImage: typeof image === 'object' ? image.url : image,
     name,
     url: originalUrl,
     description,
@@ -261,7 +256,7 @@ export const parseRecipeText = async (
 5.  **Fidelity**:
     - Only use information present in the text. Never invent ingredients or steps.
     - Ignore unrelated content such as ads, navigation, comments or personal stories.
-    - Use an empty string for \`heroImage\`, and for \`url\` unless a source URL appears in the text.
+    - Use an empty string for \`url\` unless a source URL appears in the text.
 
 ### Recipe Text:
 ${recipeText}`;

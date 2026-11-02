@@ -3,7 +3,6 @@ export type Recipe = {
   uuid: string;
   name: string;
   description: string;
-  primary_image: string;
   category: string;
   cuisine: string;
   keywords: string;

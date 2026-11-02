@@ -25,7 +25,6 @@ const RecipeForm = ({ recipe }: { recipe: FullRecipe }) => {
     defaultValues: {
       name: recipe.name,
       description: recipe.description,
-      primary_image: recipe.primary_image,
       category: recipe.category,
       cuisine: recipe.cuisine,
       keywords: recipe.keywords,
@@ -100,13 +99,6 @@ const RecipeForm = ({ recipe }: { recipe: FullRecipe }) => {
                   label="Description / Story"
                   {...register("description")}
                   error={errors.description?.message}
-                />
-              </div>
-              <div className="md:col-span-2">
-                <InputWithLabel
-                  label="Primary Image URL"
-                  {...register("primary_image")}
-                  error={errors.primary_image?.message}
                 />
               </div>
               <InputWithLabel
