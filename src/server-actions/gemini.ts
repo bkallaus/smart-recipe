@@ -46,7 +46,7 @@ export const askAI = async (prompt: string) => {
 `;
 
   const response = await client.chat.completions.create({
-    model: 'google/gemma-3-12b-it:free',
+    model: 'google/gemini-3.5-flash-lite',
     response_format: {
       type: 'json_schema',
       json_schema: {
