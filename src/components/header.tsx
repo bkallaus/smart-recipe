@@ -1,5 +1,6 @@
 import GoogleSignIn from "./google-sign-in";
 import { getUser } from "@/server-actions/verify-credentials";
+import HamburgerMenu from "./hamburger-menu";
 import RecipeIngest from "./recipe-ingest";
 import { Dices } from "lucide-react";
 import Link from "next/link";
@@ -34,6 +35,7 @@ const Header = async () => {
             </Link>
           )}
           <GoogleSignIn userName={user?.name} />
+          {user?.name && <HamburgerMenu />}
         </div>
       </div>
     </header>
