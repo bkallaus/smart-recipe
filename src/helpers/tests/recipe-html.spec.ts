@@ -41,7 +41,6 @@ describe('extractMicrodataRecipe', () => {
       category: '',
       cuisine: '',
       keywords: '',
-      heroImage: 'https://example.com/cookies.jpg',
       ingredients: [
         '1 ½ cups old-fashioned oats',
         '½ cup creamy peanut butter',
@@ -68,14 +67,12 @@ describe('extractMicrodataRecipe', () => {
         <p itemprop="recipeInstructions">Fry it.</p>
       </div>`,
       url,
-      'https://example.com/og.jpg',
     );
 
     expect(recipe?.steps.map((step) => step.text)).toEqual([
       'Crack the egg.',
       'Fry it.',
     ]);
-    expect(recipe?.heroImage).toBe('https://example.com/og.jpg');
   });
 
   test('returns null without recipe microdata or ingredients', () => {

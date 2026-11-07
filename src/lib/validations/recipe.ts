@@ -10,7 +10,6 @@ export const stepSchema = z.object({
 export const recipeSchema = z.object({
   name: z.string().min(1, "Recipe name is required").max(100),
   description: z.string().max(500),
-  primary_image: z.string().max(500),
   category: z.string().max(100),
   cuisine: z.string().max(100),
   keywords: z.string().max(500),

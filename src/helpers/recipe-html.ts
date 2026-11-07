@@ -52,7 +52,6 @@ const getPropLines = ($: CheerioAPI, el: Selection) =>
 export const extractMicrodataRecipe = (
   html: string,
   originalUrl: string,
-  fallbackImage = '',
 ): IngestRecipe | null => {
   const $ = cheerio.load(html);
   const root = findMicrodataRecipe($);
@@ -75,10 +74,6 @@ export const extractMicrodataRecipe = (
     .flatMap((el) => getPropLines($, $(el)))
     .map((text) => ({ label: text, text }));
 
-  const image = getOwnProps($, root, ['image']).first();
-  const heroImage =
-    image.attr('src') ?? image.attr('content') ?? image.attr('href') ?? '';
-
   const name =
     getPropText($, getOwnProps($, root, ['name']).first()) ||
     $('title').text().trim();
@@ -89,7 +84,6 @@ export const extractMicrodataRecipe = (
     category: getPropText($, getOwnProps($, root, ['recipeCategory']).first()),
     cuisine: getPropText($, getOwnProps($, root, ['recipeCuisine']).first()),
     keywords: getPropText($, getOwnProps($, root, ['keywords']).first()),
-    heroImage: heroImage.startsWith('http') ? heroImage : fallbackImage,
     ingredients,
     steps,
     url: originalUrl,

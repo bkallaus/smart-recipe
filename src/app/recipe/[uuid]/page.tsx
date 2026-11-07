@@ -31,19 +31,6 @@ const IndividualRecipe = async ({
   return (
     <main className="min-h-screen bg-[hsl(var(--surface))] px-6 md:px-12 lg:pl-32 lg:pr-12 py-10 lg:py-24">
       <div className="max-w-4xl space-y-16">
-        {/* Hero image */}
-        {recipe.primary_image?.includes("supabase") && (
-          <div className="relative group">
-            <img
-              src={recipe.primary_image}
-              width={800}
-              height={500}
-              alt={recipe.name}
-              className="w-full max-h-[500px] object-cover rounded-2xl shadow-ambient"
-            />
-          </div>
-        )}
-
         {/* Title row */}
         <div className="space-y-6">
           <h1

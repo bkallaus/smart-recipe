@@ -14,7 +14,6 @@ import {
 } from '../helpers/recipe-html';
 import type { IngestRecipe } from '@/types/ingest';
 import { toggleFavoriteRecipe } from '@/server-actions/favorite-recipes';
-import { downloadUploadImage } from '@/server-actions/image-service';
 
 // Many recipe sites reject requests without a browser user agent
 const FETCH_OPTIONS = {
@@ -41,7 +40,6 @@ const scrapeRecipePage = async (url: string) => {
 const parseRecipePage = async (
     html: string | undefined,
     url: string,
-    ogImage: string | undefined,
 ): Promise<IngestRecipe> => {
     const text = html ? htmlToRecipeText(getRecipeSectionHtml(html)) : '';
 
@@ -67,7 +65,6 @@ const parseRecipePage = async (
         ...mappedRecipe,
         steps: mappedRecipe.steps ?? [],
         url,
-        heroImage: ogImage ?? '',
     };
 };
 
@@ -75,19 +72,11 @@ const findStructuredRecipe = async (
     jsonLD: unknown,
     html: string | undefined,
     url: string,
-    ogImage: string | undefined,
 ) =>
     (await convertJsonLdToIngest(jsonLD, url)) ??
-    (html ? extractMicrodataRecipe(html, url, ogImage) : null);
+    (html ? extractMicrodataRecipe(html, url) : null);
 
 const saveIngestedRecipe = async (mappedRecipe: IngestRecipe, uuid?: string) => {
-    if (mappedRecipe.heroImage) {
-        const remappedHeroImage = await downloadUploadImage(mappedRecipe.heroImage);
-        if (remappedHeroImage) {
-            mappedRecipe.heroImage = remappedHeroImage;
-        }
-    }
-
     const result = await insertRecipe(mappedRecipe, uuid);
 
     if (!result) {
@@ -137,10 +126,9 @@ const withFailedIngestLog = async <T>(
 const scrapeAndSaveRecipe = async (url: string, uuid?: string) => {
     const { result, html } = await scrapeRecipePage(url);
 
-    const ogImage = result.ogImage?.[0]?.url;
     const mappedRecipe =
-        (await findStructuredRecipe(result.jsonLD, html, url, ogImage)) ??
-        (await parseRecipePage(html, url, ogImage));
+        (await findStructuredRecipe(result.jsonLD, html, url)) ??
+        (await parseRecipePage(html, url));
 
     return saveIngestedRecipe(mappedRecipe, uuid);
 };
@@ -158,10 +146,9 @@ const smartScrapeAndSaveRecipe = async (url: string) => {
         return saveIngestedRecipe(mappedRecipe);
     }
 
-    const ogImage = result.ogImage?.[0]?.url;
     const mappedRecipe =
-        (html ? extractMicrodataRecipe(html, url, ogImage) : null) ??
-        (await parseRecipePage(html, url, ogImage));
+        (html ? extractMicrodataRecipe(html, url) : null) ??
+        (await parseRecipePage(html, url));
 
     return saveIngestedRecipe(mappedRecipe);
 };
@@ -191,10 +178,6 @@ export const ingestRecipeFromText = async (recipeText: string) => {
     // found inside the text itself.
     mappedRecipe.url = mappedRecipe.url?.startsWith('http')
         ? mappedRecipe.url
-        : '';
-
-    mappedRecipe.heroImage = mappedRecipe.heroImage?.startsWith('http')
-        ? ((await downloadUploadImage(mappedRecipe.heroImage)) ?? '')
         : '';
 
     const result = await insertRecipe(mappedRecipe);
