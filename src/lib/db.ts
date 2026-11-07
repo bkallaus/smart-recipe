@@ -5,6 +5,8 @@ import type { DB } from '@/types/db';
 const dialect = new PostgresDialect({
   pool: new Pool({
     connectionString: process.env.DATABASE_URL,
+    // Fail with a clear error instead of hanging until the function times out.
+    connectionTimeoutMillis: 5_000,
   }),
 });
 

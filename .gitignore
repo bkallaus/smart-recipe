@@ -132,3 +132,7 @@ dist
 public/sw*
 public/swe-worker*
 .idea
+.vercel
+.env*
+backups/
+.dev.vars

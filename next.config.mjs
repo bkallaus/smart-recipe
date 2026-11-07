@@ -6,6 +6,8 @@ const withSerwist = withSerwistInit({
   // use something else that works, such as "service-worker/index.ts".
   swSrc: 'src/app/sw.ts',
   swDest: 'public/sw.js',
+  // A dev service worker caches stale chunks across rebuilds and branch switches.
+  disable: process.env.NODE_ENV === 'development',
 });
 
 export default withSerwist({});
