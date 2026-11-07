@@ -7,7 +7,6 @@
 		"dev": "next dev --webpack",
 		"build": "next build --webpack",
 		"start": "next start",
-		"db:restore-backup": "node --env-file=.env.local scripts/restore-backup-to-neon.mjs",
 		"kysely": "kysely-codegen --out-file ./src/types/db.ts --env-file .env.local --default-schema smart_recipes --include-pattern='smart_recipes.*'",
 		"test": "vitest"
 	},

@@ -1,6 +1,6 @@
--- Smart Recipes schema (Postgres / Neon). Ported from the Supabase public schema.
--- Supabase-only bits dropped: row level security and the unused recipe_recipe_id_seq.
--- Table names are unqualified: the restore script creates them in the smart_recipes schema.
+-- Smart Recipes schema (Postgres / Neon), reference copy of the smart_recipes schema.
+-- Row level security is not used; the app connects as the table owner.
+-- Table names are unqualified: run it with search_path set to smart_recipes (src/lib/db.ts).
 
 CREATE TABLE failed_ingest (
     id bigint NOT NULL,
