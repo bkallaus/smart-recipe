@@ -1,5 +1,9 @@
 import { describe, expect, test } from 'vitest';
-import { containsPattern, splitFilterValues } from '../recipe-filters';
+import {
+  containsPattern,
+  hasFilterValue,
+  splitFilterValues,
+} from '../recipe-filters';
 
 describe('splitFilterValues', () => {
   test('splits comma-separated values and trims them', () => {
@@ -28,5 +32,21 @@ describe('containsPattern', () => {
 
   test('escapes LIKE wildcards in the value', () => {
     expect(containsPattern('100%_a\\b')).toBe('%100\\%\\_a\\\\b%');
+  });
+});
+
+describe('hasFilterValue', () => {
+  test('matches one entry of a comma-separated value, ignoring case', () => {
+    expect(hasFilterValue('Dessert, Snack', 'snack')).toBe(true);
+    expect(hasFilterValue('Main Course', ' main course ')).toBe(true);
+  });
+
+  test('does not match partial entries', () => {
+    expect(hasFilterValue('Pies, Tarts', 'Pie')).toBe(false);
+  });
+
+  test('handles null and empty input', () => {
+    expect(hasFilterValue(null, 'Dessert')).toBe(false);
+    expect(hasFilterValue('Dessert', '  ')).toBe(false);
   });
 });

@@ -39,3 +39,8 @@ export type RandomRecipeFilterOptions = {
   categories: string[];
   cuisines: string[];
 };
+
+export type RecipeCategory = {
+  name: string;
+  slug: string;
+};
