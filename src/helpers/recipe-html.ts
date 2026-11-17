@@ -37,7 +37,7 @@ const getOwnProps = ($: CheerioAPI, root: Selection, names: string[]) =>
     .find(names.map((name) => `[itemprop~="${name}"]`).join(', '))
     .filter((_, el) => $(el).parent().closest('[itemscope]')[0] === root[0]);
 
-const getPropText = ($: CheerioAPI, el: Selection) =>
+const getPropText = (el: Selection) =>
   (el.attr('content') ?? el.text()).replace(/\s+/g, ' ').trim();
 
 const getPropLines = ($: CheerioAPI, el: Selection) =>
@@ -62,7 +62,7 @@ export const extractMicrodataRecipe = (
 
   const ingredients = getOwnProps($, root, ['recipeIngredient', 'ingredients'])
     .toArray()
-    .map((el) => getPropText($, $(el)))
+    .map((el) => getPropText($(el)))
     .filter(Boolean);
 
   if (!ingredients.length) {
@@ -75,19 +75,32 @@ export const extractMicrodataRecipe = (
     .map((text) => ({ label: text, text }));
 
   const name =
-    getPropText($, getOwnProps($, root, ['name']).first()) ||
+    getPropText(getOwnProps($, root, ['name']).first()) ||
     $('title').text().trim();
 
   return {
     name,
-    description: getPropText($, getOwnProps($, root, ['description']).first()),
-    category: getPropText($, getOwnProps($, root, ['recipeCategory']).first()),
-    cuisine: getPropText($, getOwnProps($, root, ['recipeCuisine']).first()),
-    keywords: getPropText($, getOwnProps($, root, ['keywords']).first()),
+    description: getPropText(getOwnProps($, root, ['description']).first()),
+    category: getPropText(getOwnProps($, root, ['recipeCategory']).first()),
+    cuisine: getPropText(getOwnProps($, root, ['recipeCuisine']).first()),
+    keywords: getPropText(getOwnProps($, root, ['keywords']).first()),
     ingredients,
     steps,
     url: originalUrl,
   };
+};
+
+/**
+ * The page's og:title or <title>, used to name recipes whose structured data
+ * has no name.
+ */
+export const getPageTitle = (html: string): string => {
+  const $ = cheerio.load(html);
+
+  return (
+    $('meta[property="og:title"]').attr('content')?.trim() ||
+    $('title').first().text().replace(/\s+/g, ' ').trim()
+  );
 };
 
 /**

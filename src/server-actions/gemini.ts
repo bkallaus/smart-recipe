@@ -1,10 +1,33 @@
 import OpenAI from 'openai';
 import 'server-only';
 
-const client = new OpenAI({
-  baseURL: 'https://openrouter.ai/api/v1',
-  apiKey: process.env.OPENROUTER_API_KEY as string,
-});
+export class AiConfigurationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'AiConfigurationError';
+  }
+}
+
+let client: OpenAI | null = null;
+
+// Created on first use so a missing key fails with a clear message instead of
+// the SDK's generic authentication error
+const getClient = () => {
+  const apiKey = process.env.OPENROUTER_API_KEY;
+
+  if (!apiKey) {
+    throw new AiConfigurationError(
+      'OPENROUTER_API_KEY is not set, so recipes cannot be parsed with AI',
+    );
+  }
+
+  client ??= new OpenAI({
+    baseURL: 'https://openrouter.ai/api/v1',
+    apiKey,
+  });
+
+  return client;
+};
 
 const recipeSchema = {
   type: 'object',
@@ -44,7 +67,7 @@ export const askAI = async (prompt: string) => {
   ${JSON.stringify(recipeSchema, null, 2)}
 `;
 
-  const response = await client.chat.completions.create({
+  const response = await getClient().chat.completions.create({
     model: 'google/gemma-3-12b-it:free',
     response_format: {
       type: 'json_schema',
@@ -59,5 +82,11 @@ export const askAI = async (prompt: string) => {
     ],
   });
 
-  return response.choices[0].message.content ?? '';
+  const content = response.choices?.[0]?.message?.content;
+
+  if (!content) {
+    throw new Error('The AI returned an empty response');
+  }
+
+  return content;
 };

@@ -1,5 +1,9 @@
 import { describe, expect, test, vi } from 'vitest';
-import { extractMicrodataRecipe, getRecipeSectionHtml } from '../recipe-html';
+import {
+  extractMicrodataRecipe,
+  getPageTitle,
+  getRecipeSectionHtml,
+} from '../recipe-html';
 
 // Mock the server action to avoid importing server-only code
 vi.mock('@/server-actions/gemini', () => ({
@@ -109,5 +113,19 @@ describe('getRecipeSectionHtml', () => {
     const html = '<body><p>Just a blog post</p></body>';
 
     expect(getRecipeSectionHtml(html)).toBe(html);
+  });
+});
+
+describe('getPageTitle', () => {
+  test('prefers og:title, then the title tag', () => {
+    expect(
+      getPageTitle(
+        '<head><meta property="og:title" content=" OG Name "><title>Tag</title></head>',
+      ),
+    ).toBe('OG Name');
+    expect(getPageTitle('<head><title>\n Tag  Name </title></head>')).toBe(
+      'Tag Name',
+    );
+    expect(getPageTitle('<p>none</p>')).toBe('');
   });
 });
