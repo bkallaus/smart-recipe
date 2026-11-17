@@ -7,9 +7,14 @@ import {
 import { slugify } from '@/helpers/slugify';
 import { db } from '@/lib/db';
 import type { RecipeCard, RecipeCategory } from '@/types/recipe';
+import { hasAccess } from './verify-credentials';
 
 /** Lists every distinct recipe category, sorted by name, with a URL slug. */
 export const getRecipeCategories = async (): Promise<RecipeCategory[]> => {
+  if (!(await hasAccess())) {
+    return [];
+  }
+
   const rows = await db
     .selectFrom('recipe')
     .select('category')
@@ -38,6 +43,11 @@ export const getRecipeCategories = async (): Promise<RecipeCategory[]> => {
 export const getCategoryRecipes = async (
   slug: string,
 ): Promise<{ category: RecipeCategory; recipes: RecipeCard[] } | null> => {
+  if (typeof slug !== 'string' || !slug) {
+    return null;
+  }
+
+  // getRecipeCategories checks the session and returns [] when signed out.
   const categories = await getRecipeCategories();
   const category = categories.find((c) => c.slug === slug);
 

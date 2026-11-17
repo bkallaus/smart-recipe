@@ -26,8 +26,7 @@ const Home = async () => {
         <div className="px-8 md:px-12 lg:pl-16 lg:pr-8">
           <div className="mb-10">
             <h2
-              className="text-2xl md:text-3xl font-semibold text-[hsl(var(--on-surface))]"
-              style={{ fontFamily: "'Noto Serif', Georgia, serif" }}
+              className="font-serif text-2xl md:text-3xl font-semibold text-[hsl(var(--on-surface))]"
             >
               Recent Recipes
             </h2>
@@ -44,8 +43,7 @@ const Home = async () => {
         <div className="px-8 md:px-12 lg:pl-16 lg:pr-8">
           <div className="mb-10">
             <h2
-              className="text-2xl md:text-3xl font-semibold text-[hsl(var(--on-surface))]"
-              style={{ fontFamily: "'Noto Serif', Georgia, serif" }}
+              className="font-serif text-2xl md:text-3xl font-semibold text-[hsl(var(--on-surface))]"
             >
               Categories
             </h2>

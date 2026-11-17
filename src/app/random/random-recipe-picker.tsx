@@ -157,7 +157,6 @@ const RandomRecipePicker = ({
           </p>
           <h2
             className='text-2xl md:text-3xl font-semibold mt-2 mb-3 text-[hsl(var(--on-surface))]'
-            style={{ fontFamily: "'Noto Serif', Georgia, serif" }}
           >
             {titleCase(recipe.name)}
           </h2>

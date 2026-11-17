@@ -3,6 +3,7 @@ import { ClipboardPaste, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { ingestRecipeFromText } from '@/app/query';
+import { MAX_RECIPE_TEXT_LENGTH } from '@/helpers/ingest-limits';
 import { useToast } from './ui/use-toast';
 
 const MIN_RECIPE_LENGTH = 40;
@@ -17,9 +18,20 @@ const usePasteRecipe = () => {
 
     if (text.length < MIN_RECIPE_LENGTH) {
       toast({
+        variant: 'destructive',
         title: 'Recipe Too Short',
         description:
           'Paste the full recipe, including the ingredients and the steps.',
+      });
+
+      return;
+    }
+
+    if (text.length > MAX_RECIPE_TEXT_LENGTH) {
+      toast({
+        variant: 'destructive',
+        title: 'Recipe Too Long',
+        description: `Paste just the recipe, up to ${MAX_RECIPE_TEXT_LENGTH.toLocaleString()} characters.`,
       });
 
       return;
@@ -39,6 +51,7 @@ const usePasteRecipe = () => {
     } catch (error) {
       console.error('failed to ingest pasted recipe:', error);
       toast({
+        variant: 'destructive',
         title: 'Error Ingesting Recipe',
         description:
           'We could not read that recipe. Make sure the ingredients and steps are included, then try again.',
@@ -64,7 +77,6 @@ const PasteRecipe = () => {
         <div className='mb-10'>
           <h2
             className='text-2xl md:text-3xl font-semibold text-[hsl(var(--on-surface))]'
-            style={{ fontFamily: "'Noto Serif', Georgia, serif" }}
           >
             Paste a Recipe
           </h2>

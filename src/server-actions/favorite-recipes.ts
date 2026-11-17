@@ -1,55 +1,62 @@
 'use server';
 import { db } from '@/lib/db';
+import { upsertUserRow } from '@/lib/users';
+import { isUuid } from '@/lib/uuid';
 import type { RecipeCard } from '@/types/recipe';
-import { getUser } from './verify-credentials';
+import { getUser, requireUser } from './verify-credentials';
 
-const addAsFavorite = async (uuid: string, email: string) => {
-  await db
-    .insertInto('user_recipe')
-    .values((eb) => ({
-      recipe_id: eb.selectFrom('recipe').select('id').where('uuid', '=', uuid),
-      user_id: eb.selectFrom('users').select('id').where('email', '=', email),
-    }))
-    .execute();
-};
+/**
+ * Adds the recipe to the signed-in user's favorites, or removes it when it is
+ * already there. Returns the new favorite state, or null when no recipe has
+ * that uuid. Safe to call twice concurrently: adding never conflicts.
+ */
+export const toggleFavoriteRecipe = async (
+  uuid: string,
+): Promise<boolean | null> => {
+  const user = await requireUser();
 
-const removeAsFavorite = async (recipeId: number, userId: number) => {
-  await db
-    .deleteFrom('user_recipe')
-    .where('recipe_id', '=', recipeId.toString())
-    .where('user_id', '=', userId.toString())
-    .execute();
-};
-
-export const toggleFavoriteRecipe = async (uuid: string) => {
-  const user = await getUser();
-
-  if (!user?.email) {
-    return;
+  if (!isUuid(uuid)) {
+    return null;
   }
 
-  const item = await db
-    .selectFrom('user_recipe')
-    .select(['user_id', 'recipe_id'])
-    .where('recipe_id', '=', (eb) =>
-      eb.selectFrom('recipe').select('id').where('uuid', '=', uuid),
-    )
-    .where('user_id', '=', (eb) =>
-      eb.selectFrom('users').select('id').where('email', '=', user.email),
-    )
+  const [recipe, userId] = await Promise.all([
+    db
+      .selectFrom('recipe')
+      .select('id')
+      .where('uuid', '=', uuid)
+      .executeTakeFirst(),
+    // Sign-in creates the row; upserting here also covers a row that has
+    // since been removed, so the insert below never sees a NULL user_id.
+    upsertUserRow(user),
+  ]);
+
+  if (!recipe) {
+    return null;
+  }
+
+  const removed = await db
+    .deleteFrom('user_recipe')
+    .where('recipe_id', '=', recipe.id)
+    .where('user_id', '=', userId)
     .executeTakeFirst();
 
-  if (item) {
-    await removeAsFavorite(Number(item.recipe_id), Number(item.user_id));
-  } else {
-    await addAsFavorite(uuid, user.email);
+  if (Number(removed.numDeletedRows) > 0) {
+    return false;
   }
+
+  await db
+    .insertInto('user_recipe')
+    .values({ recipe_id: recipe.id, user_id: userId })
+    .onConflict((oc) => oc.columns(['user_id', 'recipe_id']).doNothing())
+    .execute();
+
+  return true;
 };
 
 export const getAllFavoriteRecipes = async (): Promise<RecipeCard[]> => {
   const user = await getUser();
 
-  if (!user?.email) {
+  if (!user) {
     return [];
   }
 
@@ -59,31 +66,7 @@ export const getAllFavoriteRecipes = async (): Promise<RecipeCard[]> => {
     .innerJoin('users as u', 'ur.user_id', 'u.id')
     .select(['r.uuid', 'r.name', 'r.description'])
     .where('u.email', '=', user.email)
-    .execute();
-
-  return recipes.map((r) => ({
-    ...r,
-    description: r.description ?? '',
-  }));
-};
-
-export const getFavoriteRecipes = async (
-  limit?: number,
-): Promise<RecipeCard[]> => {
-  const user = await getUser();
-
-  if (!user?.email) {
-    return [];
-  }
-
-  const recipes = await db
-    .selectFrom('recipe as r')
-    .innerJoin('user_recipe as ur', 'r.id', 'ur.recipe_id')
-    .innerJoin('users as u', 'ur.user_id', 'u.id')
-    .select(['r.uuid', 'r.name', 'r.description'])
-    .where('u.email', '=', user.email)
-    .orderBy('r.id', 'desc')
-    .limit(limit ?? 9)
+    .orderBy('r.name', 'asc')
     .execute();
 
   return recipes.map((r) => ({

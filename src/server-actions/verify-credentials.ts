@@ -1,74 +1,46 @@
-'use server';
-import { OAuth2Client } from 'google-auth-library';
+import 'server-only';
 import { cookies } from 'next/headers';
-import { jwtDecode } from 'jwt-decode';
+import { cache } from 'react';
+import { SESSION_COOKIE, verifySessionToken } from '@/lib/session';
 import type { User } from '@/types/user';
 
-const client = new OAuth2Client();
+// Deliberately not 'use server': these helpers run inside server components
+// and server actions only and must not be callable as public endpoints.
 
-const getToken = async () => {
-    const cookie = await cookies();
+/**
+ * The signed-in user from the app's signed session cookie, or null when the
+ * cookie is missing, invalid or expired. Never throws for a bad cookie.
+ * Cached per request because the header and the page both ask for it.
+ */
+export const getUser = cache(async (): Promise<User | null> => {
+  const token = (await cookies()).get(SESSION_COOKIE)?.value;
 
-    const recipeToken = cookie.get('recipe-token');
+  if (!token) {
+    return null;
+  }
 
-    return recipeToken;
-};
+  const secret = process.env.SESSION_SECRET;
 
-// When should I verify?
-const verifyCookies = async (): Promise<string | null> => {
-    const recipeToken = await getToken();
+  if (!secret) {
+    // Fail closed: without the secret no session can be trusted.
+    console.error(
+      'SESSION_SECRET is not set; treating every visitor as signed out',
+    );
+    return null;
+  }
 
-    if (!recipeToken?.value) {
-        return null;
-    }
+  return verifySessionToken(token, secret);
+});
 
-    const ticket = await client.verifyIdToken({
-        idToken: recipeToken.value,
-        audience:
-            '283295300739-5stqmhh5f1b3k50scpqe747cfb2lo85r.apps.googleusercontent.com',
-    });
+export const hasAccess = async (): Promise<boolean> => !!(await getUser());
 
-    const payload = ticket.getPayload();
+/** For server actions: the signed-in user, or throws when signed out. */
+export const requireUser = async (): Promise<User> => {
+  const user = await getUser();
 
-    if (!payload?.email) {
-        return null;
-    }
+  if (!user) {
+    throw new Error('You must be signed in to do that');
+  }
 
-    return payload.email;
-};
-
-export const getEmail = async () => {
-    const recipeToken = await getToken();
-
-    if (!recipeToken?.value) {
-        return null;
-    }
-
-    const decoded = jwtDecode(recipeToken?.value) as { name: string };
-
-    return decoded.name;
-};
-
-export const getUser = async (): Promise<User | null> => {
-    const recipeToken = await getToken();
-
-    if (!recipeToken?.value) {
-        return null;
-    }
-
-    const decoded = jwtDecode(recipeToken?.value) as {
-        email: string;
-        name: string;
-    };
-
-    return {
-        email: decoded.email,
-        name: decoded.name,
-    };
-};
-
-export const hasAccess = async () => {
-    const recipeToken = await getToken();
-
-    return !!recipeToken?.value;
+  return user;
 };

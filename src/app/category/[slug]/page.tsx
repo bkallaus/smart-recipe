@@ -25,8 +25,7 @@ const CategoryPage = async ({
             &larr; All categories
           </Link>
           <h1
-            className='mt-4 text-3xl md:text-4xl font-semibold text-[hsl(var(--on-surface))]'
-            style={{ fontFamily: "'Noto Serif', Georgia, serif" }}
+            className='font-serif mt-4 text-3xl md:text-4xl font-semibold text-[hsl(var(--on-surface))]'
           >
             {result ? result.category.name : 'Category not found'}
           </h1>

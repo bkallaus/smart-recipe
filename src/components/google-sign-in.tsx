@@ -1,35 +1,50 @@
 "use client";
-import { upsertUser } from "@/server-actions/user";
 import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
-import { useCookies } from "react-cookie";
+import { GOOGLE_CLIENT_ID } from "@/lib/google-client-id";
+import { signIn } from "@/server-actions/user";
+import { useToast } from "./ui/use-toast";
+
+const SIGN_IN_FAILED = "Sign-in failed. Please try again.";
 
 const GoogleSignIn = ({ userName }: { userName: string | undefined }) => {
-  const [, setCookie] = useCookies(["recipe-token"]);
+  const { toast } = useToast();
 
   if (userName) {
     return <div>{userName}</div>;
   }
 
+  const showError = (description: string) =>
+    toast({ title: "Sign-in failed", description, variant: "destructive" });
+
   return (
-    <GoogleOAuthProvider clientId="283295300739-5stqmhh5f1b3k50scpqe747cfb2lo85r.apps.googleusercontent.com">
+    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
       <GoogleLogin
-        onSuccess={async (credentialResponse) => {
-          setCookie("recipe-token", credentialResponse.credential, {
-            maxAge: 2592000,
-            sameSite: "lax",
-            secure: true,
-          });
+        onSuccess={async ({ credential }) => {
+          if (!credential) {
+            showError(SIGN_IN_FAILED);
+            return;
+          }
 
-          await upsertUser();
+          try {
+            const result = await signIn(credential);
 
+            if (!result.ok) {
+              showError(result.error);
+              return;
+            }
+          } catch {
+            showError(SIGN_IN_FAILED);
+            return;
+          }
+
+          // The server set the session cookie; reload so the server renders
+          // the signed-in view (the login page then redirects onward).
           window.location.reload();
         }}
         useOneTap
         use_fedcm_for_prompt
         auto_select
-        onError={() => {
-          console.log("Login Failed");
-        }}
+        onError={() => showError(SIGN_IN_FAILED)}
       />
     </GoogleOAuthProvider>
   );
