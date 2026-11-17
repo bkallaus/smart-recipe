@@ -5,22 +5,32 @@ import { useState } from 'react';
 import { ingestRecipe } from '@/app/query';
 import { useToast } from './ui/use-toast';
 
+const isHttpUrl = (value: string) => {
+  try {
+    const { protocol } = new URL(value.trim());
+    return protocol === 'http:' || protocol === 'https:';
+  } catch {
+    return false;
+  }
+};
+
 const useRecipeIngest = () => {
   const { toast } = useToast();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const onMagicIngest = async (url: string) => {
+    if (!isHttpUrl(url)) {
+      toast({
+        variant: 'destructive',
+        title: 'Invalid URL',
+        description: `${url} is not valid. Please copy a valid URL`,
+      });
+
+      return;
+    }
+
     try {
       setLoading(true);
-
-      if (!url?.includes('https://')) {
-        toast({
-          title: 'Invalid URL',
-          description: `${url} is not valid. Please copy a valid URL`,
-        });
-
-        return null;
-      }
 
       const recipeId = await ingestRecipe(url);
 
@@ -33,6 +43,7 @@ const useRecipeIngest = () => {
     } catch (error) {
       console.error('failed to ingest:', error);
       toast({
+        variant: 'destructive',
         title: 'Error Ingesting Recipe',
         description:
           'Your URL may be invalid or the recipe could not be ingested, Please copy a valid url.',
@@ -57,7 +68,7 @@ const RecipeIngest = () => {
       className='flex gap-3'
       onSubmit={(e) => {
         e.preventDefault();
-        onMagicIngest(url);
+        onMagicIngest(url.trim());
       }}
     >
       <input
@@ -75,8 +86,12 @@ const RecipeIngest = () => {
         aria-busy={loading}
         className="flex items-center gap-2 px-5 py-2 gradient-primary text-white text-sm font-medium rounded-full shadow-ambient transition-opacity duration-200 hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
       >
-        {loading && <Loader2 className='h-4 w-4 animate-spin' />}
-        <Sparkles className='h-4 w-4' /> Smart Ingest
+        {loading ? (
+          <Loader2 className='h-4 w-4 animate-spin' />
+        ) : (
+          <Sparkles className='h-4 w-4' />
+        )}
+        Smart Ingest
       </button>
     </form>
   );

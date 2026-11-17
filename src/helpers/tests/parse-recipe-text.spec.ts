@@ -76,4 +76,60 @@ describe('parseRecipeText', () => {
 
     expect(recipe).toBeNull();
   });
+
+  test('should rethrow a missing API key instead of hiding it', async () => {
+    const error = new Error('OPENROUTER_API_KEY is not set');
+    error.name = 'AiConfigurationError';
+    mockedAskAI.mockRejectedValue(error);
+
+    await expect(parseRecipeText(PastedText)).rejects.toThrow(
+      'OPENROUTER_API_KEY is not set',
+    );
+  });
+
+  test('should normalise sloppy model output', async () => {
+    mockedAskAI.mockResolvedValue(
+      JSON.stringify({
+        name: '  Chocolate Chip Cookies ',
+        description: null,
+        category: ['Dessert', 'Snack'],
+        ingredients: [' 1 cup flour ', '', 2, null, { qty: 1 }],
+        steps: [
+          'Preheat the oven.',
+          { text: 'Mix everything.' },
+          { label: 'Bake', text: 'Bake 12 minutes.', section: 'Baking' },
+          { label: '  ' },
+          42,
+        ],
+      }),
+    );
+
+    const recipe = await parseRecipeText(PastedText);
+
+    expect(recipe).toEqual({
+      name: 'Chocolate Chip Cookies',
+      description: '',
+      category: 'Dessert, Snack',
+      cuisine: '',
+      keywords: '',
+      url: '',
+      ingredients: ['1 cup flour', '2'],
+      steps: [
+        { label: 'Preheat the oven.', text: 'Preheat the oven.' },
+        { label: 'Mix everything.', text: 'Mix everything.' },
+        { label: 'Bake', text: 'Bake 12 minutes.', section: 'Baking' },
+      ],
+    });
+  });
+
+  test.each([
+    ['no name', { ...RecipeResponse, name: '' }],
+    ['no ingredients', { ...RecipeResponse, ingredients: ['', '  '] }],
+    ['a non-object response', ['not', 'a', 'recipe']],
+    ['null', null],
+  ])('should return null for %s', async (_label, response) => {
+    mockedAskAI.mockResolvedValue(JSON.stringify(response));
+
+    expect(await parseRecipeText(PastedText)).toBeNull();
+  });
 });
