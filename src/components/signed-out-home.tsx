@@ -16,8 +16,7 @@ const SignedOutHome = async () => {
         <div className="absolute inset-0 opacity-10 bg-[radial-gradient(ellipse_at_top_right,_hsl(var(--surface-container-lowest))_0%,_transparent_60%)]" />
         <div className="px-8 md:px-12 lg:pl-16 lg:pr-8 relative z-10">
           <h1
-            className="text-4xl font-bold tracking-tight sm:text-5xl xl:text-6xl text-[hsl(var(--on-primary))] leading-tight"
-            style={{ fontFamily: "'Noto Serif', Georgia, serif" }}
+            className="font-serif text-4xl font-bold tracking-tight sm:text-5xl xl:text-6xl text-[hsl(var(--on-primary))] leading-tight"
           >
             Import Any Recipe
             <br />
@@ -34,8 +33,7 @@ const SignedOutHome = async () => {
         <div className="px-8 md:px-12 lg:pl-16 lg:pr-8">
           <div className="mb-10">
             <h2
-              className="text-2xl md:text-3xl font-semibold text-[hsl(var(--on-surface))]"
-              style={{ fontFamily: "'Noto Serif', Georgia, serif" }}
+              className="font-serif text-2xl md:text-3xl font-semibold text-[hsl(var(--on-surface))]"
             >
               Recent Recipes
             </h2>

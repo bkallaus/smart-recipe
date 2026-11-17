@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
 import { toggleFavoriteRecipe } from "@/server-actions/favorite-recipes";
-import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -16,12 +16,22 @@ const FavoriteButton = ({
 }) => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
   const onToggle = async () => {
     setIsLoading(true);
     try {
       await toggleFavoriteRecipe(uuid);
       router.refresh();
+    } catch (error) {
+      console.error("Failed to toggle favorite", error);
+      toast({
+        title: "Error",
+        description: isFavorite
+          ? "Couldn't remove this recipe from your favorites. Please try again."
+          : "Couldn't save this recipe to your favorites. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -29,8 +39,7 @@ const FavoriteButton = ({
 
   return (
     <Button
-      disabled={isLoading}
-      aria-busy={isLoading}
+      loading={isLoading}
       onClick={onToggle}
       className={cn(
         "rounded-full px-6 font-semibold transition-all duration-300",
@@ -39,7 +48,6 @@ const FavoriteButton = ({
           : "gradient-primary text-white hover:opacity-90 border-0 shadow-ambient-md"
       )}
     >
-      {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
       {isFavorite ? "Saved to Favorites" : "Save to Favorites"}
     </Button>
   );

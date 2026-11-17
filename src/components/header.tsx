@@ -1,8 +1,8 @@
 import { Dices } from 'lucide-react';
 import Link from 'next/link';
 import { getUser } from '@/server-actions/verify-credentials';
-import GoogleSignIn from './google-sign-in';
 import HamburgerMenu from './hamburger-menu';
+import HeaderSignIn from './header-sign-in';
 import RecipeIngest from './recipe-ingest';
 
 const Header = async () => {
@@ -11,13 +11,12 @@ const Header = async () => {
   return (
     <header className='sticky top-0 z-50 glass-nav border-b border-[hsl(var(--outline-variant)/0.15)]'>
       <div className='flex flex-wrap items-center justify-between px-6 py-4 gap-4 max-w-7xl mx-auto'>
-        <a
+        <Link
           href='/'
           className='font-serif text-2xl font-semibold tracking-tight text-[hsl(var(--on-surface))] hover:text-[hsl(var(--primary))] transition-colors duration-200'
-          style={{ fontFamily: "'Noto Serif', Georgia, serif" }}
         >
           Smart Recipe
-        </a>
+        </Link>
         {user?.name && (
           <div className='order-last w-full md:w-auto md:order-none'>
             <RecipeIngest />
@@ -37,7 +36,7 @@ const Header = async () => {
           {user?.name ? (
             <HamburgerMenu userName={user.name} />
           ) : (
-            <GoogleSignIn userName={undefined} />
+            <HeaderSignIn />
           )}
         </div>
       </div>

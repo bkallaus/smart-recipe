@@ -1,78 +1,93 @@
 'use client';
-import { Search, X } from 'lucide-react';
-import { useEffect, useRef, useState, useTransition } from 'react';
+import { useEffect, useState } from 'react';
 import { useDebounce } from 'use-debounce';
 import { searchRecipes } from '@/server-actions/recipes';
 import type { RecipeCard } from '@/types/recipe';
 import RecipeRow from './recipe-row';
-import { Button } from './ui/button';
+
+type SearchState =
+  | { status: 'idle' }
+  | { status: 'loading' }
+  | { status: 'done'; term: string; recipes: RecipeCard[] }
+  | { status: 'error' };
+
+const SEARCH_DEBOUNCE_MS = 300;
 
 const SearchRecipes = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [recentRecipes, setRecentRecipes] = useState<RecipeCard[]>([]);
-  const [isPending, startTransition] = useTransition();
-  const inputRef = useRef<HTMLInputElement>(null);
+  const [search, setSearch] = useState<SearchState>({ status: 'idle' });
 
-  const [value] = useDebounce(searchTerm, 1000);
-
-  const searchForRecipes = async (search: string) => {
-    const recipes = await searchRecipes(search);
-    return recipes;
-  };
+  const [value] = useDebounce(searchTerm.trim(), SEARCH_DEBOUNCE_MS);
 
   useEffect(() => {
     if (!value) {
-      setRecentRecipes([]);
+      setSearch({ status: 'idle' });
       return;
     }
 
-    startTransition(async () => {
-      const recipes = await searchRecipes(value);
-      setRecentRecipes(recipes);
-    });
+    // A slow earlier request must not overwrite a newer one: once the term
+    // changes (or the component unmounts) this effect's response is ignored.
+    let stale = false;
+    setSearch({ status: 'loading' });
+    searchRecipes(value).then(
+      (recipes) => {
+        if (!stale) setSearch({ status: 'done', term: value, recipes });
+      },
+      (error: unknown) => {
+        console.error('Recipe search failed', error);
+        if (!stale) setSearch({ status: 'error' });
+      },
+    );
+
+    return () => {
+      stale = true;
+    };
   }, [value]);
+
+  const isPending = search.status === 'loading';
 
   return (
     <div>
       {/* Hero Section — primary→primary-container 135° gradient */}
-      <section
-        className="w-full py-16 md:py-28 lg:py-36 gradient-hero relative overflow-hidden"
-      >
+      <section className='w-full py-16 md:py-28 lg:py-36 gradient-hero relative overflow-hidden'>
         {/* Subtle texture overlay */}
-        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(ellipse_at_top_right,_hsl(var(--surface-container-lowest))_0%,_transparent_60%)]" />
+        <div className='absolute inset-0 opacity-10 bg-[radial-gradient(ellipse_at_top_right,_hsl(var(--surface-container-lowest))_0%,_transparent_60%)]' />
 
-        <div className="container px-8 md:px-12 lg:pl-16 lg:pr-8 relative z-10">
-          <div className="grid gap-8 lg:grid-cols-2 lg:gap-16 items-center">
-            <div className="space-y-4">
-              <h1
-                className="text-4xl font-bold tracking-tight sm:text-5xl xl:text-6xl text-[hsl(var(--on-primary))] leading-tight"
-                style={{ fontFamily: "'Noto Serif', Georgia, serif" }}
-              >
+        <div className='container px-8 md:px-12 lg:pl-16 lg:pr-8 relative z-10'>
+          <div className='grid gap-8 lg:grid-cols-2 lg:gap-16 items-center'>
+            <div className='space-y-4'>
+              <h1 className='font-serif text-4xl font-bold tracking-tight sm:text-5xl xl:text-6xl text-[hsl(var(--on-primary))] leading-tight'>
                 Find Your Next
                 <br />
-                <span className="italic font-normal opacity-90">Favorite Recipe</span>
+                <span className='italic font-normal opacity-90'>
+                  Favorite Recipe
+                </span>
               </h1>
-              <p className="text-[hsl(var(--on-primary)/0.75)] text-lg max-w-sm">
+              <p className='text-[hsl(var(--on-primary)/0.75)] text-lg max-w-sm'>
                 Search through your curated collection of AI-enhanced recipes.
               </p>
             </div>
 
             {/* Input with ghost bottom border, primary on focus */}
-            <div className="flex flex-col w-full relative">
-              <div className="relative">
+            <div className='flex flex-col w-full relative'>
+              <label htmlFor='recipe-search' className='sr-only'>
+                Search recipes
+              </label>
+              <div className='relative'>
                 <input
-                  type="text"
-                  id="recipe-search"
-                  placeholder="Search for recipes…"
-                  className="w-full px-5 py-4 pr-14 text-base rounded-xl bg-[hsl(var(--surface-container-lowest)/0.95)] text-[hsl(var(--on-surface))] placeholder-[hsl(var(--on-surface-variant))] outline-none border-0 border-b-2 border-[hsl(var(--outline-variant)/0.3)] focus:border-[hsl(var(--primary))] transition-colors duration-200 shadow-ambient"
+                  type='search'
+                  id='recipe-search'
+                  placeholder='Search for recipes…'
+                  autoComplete='off'
+                  className='w-full px-5 py-4 pr-14 text-base rounded-xl bg-[hsl(var(--surface-container-lowest)/0.95)] text-[hsl(var(--on-surface))] placeholder-[hsl(var(--on-surface-variant))] outline-none border-0 border-b-2 border-[hsl(var(--outline-variant)/0.3)] focus:border-[hsl(var(--primary))] transition-colors duration-200 shadow-ambient'
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
-                {isPending && (
-                  <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[hsl(var(--primary))]" />
+                {isPending ? (
+                  <div className='absolute right-4 top-1/2 -translate-y-1/2'>
+                    <div className='animate-spin rounded-full h-5 w-5 border-b-2 border-[hsl(var(--primary))]' />
                   </div>
-                )}
+                ) : null}
               </div>
             </div>
           </div>
@@ -80,20 +95,31 @@ const SearchRecipes = () => {
       </section>
 
       {/* Search results */}
-      {(recentRecipes.length > 0 || isPending) && (
-        <div className="px-8 md:px-12 lg:pl-16 lg:pr-8 py-12 bg-[hsl(var(--surface-container-low))]">
-          {isPending ? (
-            <div className="flex justify-center items-center gap-3 py-12">
-              <div className="animate-spin rounded-full h-7 w-7 border-b-2 border-[hsl(var(--primary))]" />
-              <span className="text-base text-[hsl(var(--on-surface-variant))]">
+      {search.status !== 'idle' ? (
+        <div
+          className='px-8 md:px-12 lg:pl-16 lg:pr-8 py-12 bg-[hsl(var(--surface-container-low))]'
+          aria-live='polite'
+        >
+          {search.status === 'loading' ? (
+            <div className='flex justify-center items-center gap-3 py-12'>
+              <div className='animate-spin rounded-full h-7 w-7 border-b-2 border-[hsl(var(--primary))]' />
+              <span className='text-base text-[hsl(var(--on-surface-variant))]'>
                 Searching…
               </span>
             </div>
+          ) : search.status === 'error' ? (
+            <p className='py-12 text-center text-base text-destructive'>
+              Something went wrong while searching. Please try again.
+            </p>
+          ) : search.recipes.length > 0 ? (
+            <RecipeRow recipes={search.recipes} />
           ) : (
-            <RecipeRow recipes={recentRecipes} />
+            <p className='py-12 text-center text-base text-[hsl(var(--on-surface-variant))]'>
+              No recipes match &ldquo;{search.term}&rdquo;.
+            </p>
           )}
         </div>
-      )}
+      ) : null}
     </div>
   );
 };
