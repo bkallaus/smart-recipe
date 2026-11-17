@@ -188,15 +188,6 @@ export const insertRecipe = async (recipe: IngestRecipe, uuid?: string) => {
     .executeTakeFirst();
 };
 
-export const deleteRecipe = async (id: number) => {
-  await requireUser();
-
-  await db
-    .deleteFrom('recipe')
-    .where('id', '=', assertRecipeId(id).toString())
-    .execute();
-};
-
 /** Logs a failed ingest. Called server-side by src/app/query.ts. */
 export const insertIntoFailedIngest = async (url: string, error?: string) => {
   await requireUser();

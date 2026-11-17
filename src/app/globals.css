@@ -86,17 +86,6 @@
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-noto-serif), 'Noto Serif', Georgia, serif;
   }
-
-  /*
-   * Compatibility shim: next/font registers the family under a hashed name, so
-   * a literal `font-family: 'Noto Serif'` no longer resolves. Some components
-   * still set it inline; point them at the self-hosted font until they switch
-   * to the `font-serif` class.
-   */
-  [style*="Noto Serif"] {
-    /* biome-ignore lint/complexity/noImportantStyles: only !important beats an inline style */
-    font-family: var(--font-noto-serif), 'Noto Serif', Georgia, serif !important;
-  }
 }
 
 /* Glass & Gradient utilities */

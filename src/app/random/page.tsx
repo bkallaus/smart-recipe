@@ -13,7 +13,6 @@ const RandomRecipePage = async () => {
         <div className='px-8 md:px-12 lg:pl-16 lg:pr-8 max-w-4xl'>
           <h1
             className='text-3xl md:text-4xl font-semibold text-[hsl(var(--on-surface))]'
-            style={{ fontFamily: "'Noto Serif', Georgia, serif" }}
           >
             Surprise Me
           </h1>

@@ -77,7 +77,6 @@ const PasteRecipe = () => {
         <div className='mb-10'>
           <h2
             className='text-2xl md:text-3xl font-semibold text-[hsl(var(--on-surface))]'
-            style={{ fontFamily: "'Noto Serif', Georgia, serif" }}
           >
             Paste a Recipe
           </h2>

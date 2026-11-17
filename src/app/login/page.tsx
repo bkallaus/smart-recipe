@@ -34,7 +34,6 @@ const LoginPage = async ({
         <div className="space-y-3 text-center">
           <h1
             className="text-3xl font-semibold text-[hsl(var(--on-surface))]"
-            style={{ fontFamily: "'Noto Serif', Georgia, serif" }}
           >
             Sign in to continue
           </h1>
