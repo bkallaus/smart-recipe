@@ -134,5 +134,6 @@ public/swe-worker*
 .idea
 .vercel
 .env*
+!.env.example
 backups/
 .dev.vars
