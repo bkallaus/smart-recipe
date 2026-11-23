@@ -6,8 +6,8 @@ import { requireAccess } from "@/helpers/require-access";
 import { notFound } from "next/navigation";
 import { titleCase } from "title-case";
 import StepsOrSections from "./steps-or-sections";
+import IngredientsChecklist from "./ingredients-checklist";
 import { Paper } from "@/components/paper";
-import { Fragment } from "react";
 import FavoriteButton from "./favorite-button";
 import { WakeLockButton } from "@/components/wake-lock";
 
@@ -84,14 +84,7 @@ const IndividualRecipe = async ({
             >
               Ingredients
             </h2>
-            <div className="space-y-6">
-              {recipe.ingredients.map((ingredient, index) => (
-                <div key={`ingredient-${index}`} className="flex items-start gap-4 text-lg text-[hsl(var(--on-surface))]">
-                  <span className="shrink-0 w-2 h-2 mt-2.5 rounded-full bg-[hsl(var(--secondary))] opacity-60" />
-                  <span>{ingredient}</span>
-                </div>
-              ))}
-            </div>
+            <IngredientsChecklist ingredients={recipe.ingredients} />
           </Paper>
         </section>
 
