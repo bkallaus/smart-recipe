@@ -7,10 +7,24 @@ import type {
   RandomRecipeFilters,
   RecipeCard,
 } from '@/types/recipe';
-import { getUser } from './verify-credentials';
+import { getUser, hasAccess } from './verify-credentials';
+
+/**
+ * True when the comma-separated column holds `value` as one whole entry,
+ * case-insensitively, matching `hasFilterValue` so "Pie" skips "Pies".
+ */
+const hasEntry = (column: 'r.category' | 'r.cuisine', value: string) =>
+  sql<boolean>`exists (
+    select 1 from unnest(string_to_array(${sql.ref(column)}, ',')) as entry
+    where lower(btrim(entry)) = lower(${value})
+  )`;
 
 export const getRandomRecipeFilterOptions =
   async (): Promise<RandomRecipeFilterOptions> => {
+    if (!(await hasAccess())) {
+      return { categories: [], cuisines: [] };
+    }
+
     const rows = await db
       .selectFrom('recipe')
       .select(['category', 'cuisine'])
@@ -25,6 +39,9 @@ export const getRandomRecipeFilterOptions =
     };
   };
 
+const asTrimmed = (value: unknown) =>
+  typeof value === 'string' ? value.trim() : undefined;
+
 /**
  * Picks a random recipe matching the filters. When `excludeUuid` is given
  * (the previous pick), another match is preferred so "pick again" changes
@@ -34,20 +51,31 @@ export const pickRandomRecipe = async (
   filters: RandomRecipeFilters,
   excludeUuid?: string,
 ): Promise<RecipeCard | null> => {
-  const category = filters.category?.trim();
-  const cuisine = filters.cuisine?.trim();
-  const ingredient = filters.ingredient?.trim();
+  const user = await getUser();
+
+  if (!user || !filters || typeof filters !== 'object') {
+    return null;
+  }
+
+  const category = asTrimmed(filters.category);
+  const cuisine = asTrimmed(filters.cuisine);
+  const ingredient = asTrimmed(filters.ingredient);
 
   let query = db
     .selectFrom('recipe as r')
     .select(['r.uuid', 'r.name', 'r.description']);
 
   if (category) {
-    query = query.where('r.category', 'ilike', containsPattern(category));
+    // ILIKE is a cheap pre-filter; hasEntry keeps only whole entries.
+    query = query
+      .where('r.category', 'ilike', containsPattern(category))
+      .where(hasEntry('r.category', category));
   }
 
   if (cuisine) {
-    query = query.where('r.cuisine', 'ilike', containsPattern(cuisine));
+    query = query
+      .where('r.cuisine', 'ilike', containsPattern(cuisine))
+      .where(hasEntry('r.cuisine', cuisine));
   }
 
   if (ingredient) {
@@ -62,13 +90,7 @@ export const pickRandomRecipe = async (
     );
   }
 
-  if (filters.favoritesOnly) {
-    const user = await getUser();
-
-    if (!user?.email) {
-      return null;
-    }
-
+  if (filters.favoritesOnly === true) {
     query = query.where((eb) =>
       eb.exists(
         eb

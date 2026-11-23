@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getFullRecipeById } from "@/server-actions/recipes";
 import { requireAccess } from "@/helpers/require-access";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { titleCase } from "title-case";
 import StepsOrSections from "./steps-or-sections";
@@ -34,9 +35,8 @@ const IndividualRecipe = async ({
         {/* Title row */}
         <div className="space-y-6">
           <h1
-            className="text-5xl md:text-6xl lg:text-7xl font-bold text-[hsl(var(--on-surface))] leading-[1.1]"
+            className="font-serif text-5xl md:text-6xl lg:text-7xl font-bold text-[hsl(var(--on-surface))] leading-[1.1]"
             style={{
-              fontFamily: "'Noto Serif', Georgia, serif",
               viewTransitionName: `recipe-title-${recipe.uuid}`,
             }}
           >
@@ -50,6 +50,9 @@ const IndividualRecipe = async ({
                 <a href={recipe.url} target="_blank" rel="noopener noreferrer">Original Recipe</a>
               </Button>
             )}
+            <Button asChild variant="secondary" className="rounded-full bg-[hsl(var(--surface-container-highest))] border-0 text-[hsl(var(--on-surface))] hover:bg-[hsl(var(--surface-container-high))]">
+              <Link href={`/recipe/${recipe.uuid}/edit`}>Edit</Link>
+            </Button>
             <WakeLockButton />
           </div>
 
@@ -79,8 +82,7 @@ const IndividualRecipe = async ({
         <section>
           <Paper>
             <h2
-              className="text-2xl md:text-3xl font-bold text-[hsl(var(--primary))] mb-8"
-              style={{ fontFamily: "'Noto Serif', Georgia, serif" }}
+              className="font-serif text-2xl md:text-3xl font-bold text-[hsl(var(--primary))] mb-8"
             >
               Ingredients
             </h2>
@@ -92,8 +94,7 @@ const IndividualRecipe = async ({
         <section>
           <Paper>
             <h2
-              className="text-2xl md:text-3xl font-bold text-[hsl(var(--primary))] mb-8"
-              style={{ fontFamily: "'Noto Serif', Georgia, serif" }}
+              className="font-serif text-2xl md:text-3xl font-bold text-[hsl(var(--primary))] mb-8"
             >
               Instructions
             </h2>
